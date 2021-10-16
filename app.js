@@ -44,8 +44,8 @@ app.use("", myServer);
 app.use("/user", user);
 app.use("/expenses", expenses);
 app.use("/category", category);
-app.use("/product", products);
-app.use("/history", productHistory);
+//app.use("/product", products);
+//app.use("/history", productHistory);
 
 // create a write stream (in append mode)
 const accessLogStream = fs.createWriteStream(
