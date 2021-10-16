@@ -152,6 +152,105 @@ exports.staffAction = async (req, res, next) => {
     });
 };
 
+/// This function edit name and phone number of a user
+exports.editUser = async (req, res, next) => {
+  const name = req.body.name;
+  const phone = req.body.phone;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(422)
+      .send({ error: "true", message: errors.array()[0].msg });
+  }
+
+  await User.findByIdAndUpdate(req.userId, {
+    $set: { name: name, phone: phone },
+  })
+    .then((updatedUser) => {
+      return res
+        .status(200)
+        .send({ error: false, message: `Successfully updated user` });
+    })
+    .catch((err) => {
+      return res
+        .status(500)
+        .send({ error: true, message: `Database operation failed` });
+    });
+};
+
+/// This function changes pin of a user
+exports.changePin = async (req, res) => {
+  const currentPin = req.body.currentPin;
+  const newPin = req.body.newPin;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(422)
+      .send({ error: "true", message: errors.array()[0].msg });
+  }
+
+  const user = await User.findById(req.userId);
+  const validPin = await bcrypt.compare(currentPin, user.pin);
+
+  if (!validPin)
+    return res
+      .status(400)
+      .send({ error: true, message: "Current pin does not match" });
+  await bcrypt.hash(newPin, 12).then((hashedPin) => {
+    User.findByIdAndUpdate(
+      req.userId,
+      {
+        $set: {
+          pin: hashedPin,
+        },
+      },
+      { new: true }
+    )
+      .then((updatedUser) => {
+        return res
+          .status(200)
+          .send({ error: false, message: "Pin updated successfully" });
+      })
+      .catch((err) => {
+        return res.status(404).send({
+          error: true,
+          message: "The user with the given ID was not found.",
+        });
+      });
+  });
+};
+
+/// This function reset pin of a user
+exports.resetPin = async (req, res) => {
+  const userId = req.params.id;
+  const newPin = "1234";
+
+  await bcrypt.hash(newPin, 12).then((hashedPin) => {
+    User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          pin: hashedPin,
+        },
+      },
+      { new: true }
+    )
+      .then((updatedUser) => {
+        return res
+          .status(200)
+          .send({ error: false, message: "Pin reset successful" });
+      })
+      .catch((err) => {
+        return res.status(404).send({
+          error: true,
+          message: "The user with the given ID was not found.",
+        });
+      });
+  });
+};
+
 /// This function gets all the users in the User table
 exports.getUsers = async (req, res, next) => {
   try {
