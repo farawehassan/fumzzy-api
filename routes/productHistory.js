@@ -1,6 +1,6 @@
 const express = require("express");
 const controller = require("../controllers/productHistory");
-const isAuth = require("../middleware/is-Auth");
+const isAuth = require("../middleware/is-auth");
 const router = express.Router();
 
 // Fetch all product history from the database

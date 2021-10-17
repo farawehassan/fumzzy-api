@@ -1,7 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const controller = require("../controllers/product");
-const isAuth = require("../middleware/is-Auth");
+const isAuth = require("../middleware/is-auth");
 const router = express.Router();
 
 // Fetch all available products from the database
