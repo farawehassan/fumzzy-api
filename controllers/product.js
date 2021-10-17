@@ -11,6 +11,9 @@ exports.addNewProduct = async (req, res, next) => {
       .send({ error: "true", message: errors.array()[0].msg });
   }
 
+  const product = await Product.findOne({productName: req.body.productName})
+  if(product != null) return res.status(422).send({ error: 'true', message: 'Product exists already' });
+
   let category;
   category = await ProductCategories.findOne({name: req.body.category});
   if (category == null) {
