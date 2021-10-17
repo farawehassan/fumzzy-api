@@ -5,14 +5,14 @@ const isAuth = require("../middleware/is-auth");
 const router = express.Router();
 
 // Fetch all available products from the database
-router.get("/fetchAllProducts", isAuth, controller.fetchProducts);
+router.get("/fetchAll", isAuth, controller.fetchProducts);
 
 // Fetch a particular product from the database
-router.get("/fetchProduct/:id", isAuth, controller.findProduct);
+router.get("/fetch/:id", isAuth, controller.findProduct);
 
 // Add new product to the database
 router.post(
-  "/addProduct",
+  "/add",
   isAuth,
   [
     body("costPrice")
@@ -57,7 +57,7 @@ router.post(
 
 // Update a product's details in the database
 router.put(
-  "/editProduct/:id",
+  "/update/:id",
   isAuth,
   [
     body("costPrice")
@@ -101,6 +101,6 @@ router.put(
 );
 
 // Delete a product from the database
-router.delete("/deleteProduct", isAuth, controller.deleteProduct);
+router.delete("/delete", isAuth, controller.deleteProduct);
 
 module.exports = router;
