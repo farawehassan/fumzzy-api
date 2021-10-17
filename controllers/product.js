@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const ProductCategories = require("../models/productCategories");
+const ProductHistoryController = require("../controllers/productHistory");
 const { validationResult } = require("express-validator");
 
 // Add new product
@@ -34,8 +35,8 @@ exports.addNewProduct = async (req, res, next) => {
     initialQty: req.body.initialQty,
     currentQty: req.body.currentQty,
     sellersName: req.body.sellersName,
-  }).then((value) => {
-      return res.status(200).send({error: "false", message: `${req.body.productName} was successfully added`});
+  }).then(async(value) => {
+      await ProductHistoryController.addProductHistory(req, res, next)
   }).catch((err) => {
     console.log(err);
     return res.status(500).send({error: "true", message: "Database operation failed, please try again"});
@@ -83,9 +84,7 @@ exports.findProduct = (req, res, next) => {
 exports.updateProduct = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .send({ status: 422, error: "true", message: errors.array()[0].msg });
+    return res.status(422).send({ status: 422, error: "true", message: errors.array()[0].msg });
   }
   Product.findById(req.params.id)
     .then((product) => {
@@ -108,7 +107,7 @@ exports.updateProduct = (req, res, next) => {
         function (err, result) {
           if (err) {
             console.log(err);
-            return resizeBy.status(500).send({ error: "true", message: "Updating product failed." });
+            return res.status(500).send({ error: "true", message: "Updating product failed." });
           } else {
             return res.status(200).send({error: "false", message: `Updated ${req.body.productName} successfully` });
           }

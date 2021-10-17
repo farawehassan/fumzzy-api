@@ -4,13 +4,10 @@ const isAuth = require("../middleware/is-auth");
 const router = express.Router();
 
 // Fetch all product history from the database
-router.get("/fetchProductHistory", isAuth, controller.fetchProductHistory);
+router.get("/fetchAll", isAuth, controller.fetchProductHistory);
 
 // Fetch a particular product history from the database
-router.get("/findProductHistory/:id", isAuth, controller.findProductHistory);
-
-// Add new product history to the database
-router.post("/addProductHistory", isAuth, controller.addProductHistory);
+router.get("/find/:id", isAuth, controller.findProductHistory);
 
 // Add new history to product history to the database
 router.post(
@@ -22,7 +19,10 @@ router.post(
 // Update product history name in the database
 router.put("/updateProductName", isAuth, controller.updateProductName);
 
+// Remove history from a product history in the database
+router.put("/remove", isAuth, controller.removeHistoryFromProductHistory);
+
 // Delete a product history
-router.delete("/deleteHistory/:id", isAuth, controller.deleteHistory);
+router.delete("/delete/:id", isAuth, controller.deleteHistory);
 
 module.exports = router;
