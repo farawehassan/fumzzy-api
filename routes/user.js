@@ -1,9 +1,9 @@
-const express = require("express");
-const { check, body } = require("express-validator");
-const controller = require("../controllers/user");
-const isAdmin = require("../middleware/is-admin");
-const isAuth = require("../middleware/is-auth");
-const router = express.Router();
+const express = require("express")
+const { check, body } = require("express-validator")
+const controller = require("../controllers/user")
+const isAdmin = require("../middleware/is-admin")
+const isAuth = require("../middleware/is-auth")
+const router = express.Router()
 
 router.post(
   "/login",
@@ -14,7 +14,7 @@ router.post(
       .isLength(4),
   ],
   controller.login
-);
+)
 
 router.post(
   "/signup",
@@ -25,9 +25,9 @@ router.post(
       .isLength(4),
   ],
   controller.signup
-);
+)
 
-router.put("/edit", isAuth, controller.editUser);
+router.put("/edit", isAuth, controller.editUser)
 
 router.put(
   "/changePin",
@@ -44,12 +44,12 @@ router.put(
       .isLength(4),
   ],
   controller.changePin
-);
+)
 
-router.put("/resetPin/:id", isAdmin, controller.resetPin);
+router.put("/resetPin/:id", isAdmin, controller.resetPin)
 
-router.get("/getAll", isAdmin, controller.getUsers);
+router.get("/getAll", isAdmin, controller.getUsers)
 
-router.put("/action/:id/:status", isAdmin, controller.staffAction);
+router.put("/action/:id/:status", isAdmin, controller.staffAction)
 
-module.exports = router;
+module.exports = router

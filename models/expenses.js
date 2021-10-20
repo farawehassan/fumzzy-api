@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const expensesSchema = new mongoose.Schema({
   description: {
@@ -14,8 +14,8 @@ const expensesSchema = new mongoose.Schema({
     ref: 'User',
   }
 }, { timestamps: true }
-);
+)
 
-const Expenses = mongoose.model('Expenses', expensesSchema);
+const Expenses = mongoose.model('Expenses', expensesSchema)
 
-module.exports = Expenses;
+module.exports = Expenses

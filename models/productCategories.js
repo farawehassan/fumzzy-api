@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const productCategoriesSchema = new mongoose.Schema(
   {
@@ -12,11 +12,11 @@ const productCategoriesSchema = new mongoose.Schema(
     },
   },
   { timestamps: true }
-);
+)
 
 const ProductCategories = mongoose.model(
   "ProductCategories",
   productCategoriesSchema
-);
+)
 
-module.exports = ProductCategories;
+module.exports = ProductCategories
