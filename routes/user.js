@@ -48,6 +48,8 @@ router.put(
 
 router.put('/resetPin/:id', isAdmin, controller.resetPin)
 
+router.get('/getCurrentUser', isAuth, controller.getCurrentUser)
+
 router.get('/getAll', isAdmin, controller.getUsers)
 
 router.put('/action/:id/:status', isAdmin, controller.staffAction)

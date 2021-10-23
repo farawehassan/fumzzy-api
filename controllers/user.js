@@ -154,9 +154,6 @@ exports.staffAction = async (req, res, next) => {
 
 /// This function edit name and phone number of a user
 exports.editUser = async (req, res, next) => {
-  const name = req.body.name
-  const phone = req.body.phone
-
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -165,7 +162,7 @@ exports.editUser = async (req, res, next) => {
   }
 
   await User.findByIdAndUpdate(req.userId, {
-    $set: { name: name, phone: phone },
+    $set: { name: req.body.name, phone: req.body.phone },
   })
     .then((updatedUser) => {
       return res
@@ -266,5 +263,16 @@ exports.getUsers = async (req, res, next) => {
     return res
       .status(500)
       .send({ error: true, message: 'Database operation failed' })
+  }
+}
+
+/// This function gets the current user
+exports.getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId).select(['-pin', '-__v'])
+    return res.status(200).send({error: false, message: 'Successfully fetched user', data: user })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ error: true, message: 'Database operation failed' })
   }
 }
