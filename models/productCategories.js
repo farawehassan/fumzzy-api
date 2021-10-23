@@ -1,10 +1,10 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose')
 
 const productCategoriesSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Please tell us the category name!"],
+      required: [true, 'Please tell us the category name!'],
     },
     products: {
       type: Number,
@@ -15,7 +15,7 @@ const productCategoriesSchema = new mongoose.Schema(
 )
 
 const ProductCategories = mongoose.model(
-  "ProductCategories",
+  'ProductCategories',
   productCategoriesSchema
 )
 

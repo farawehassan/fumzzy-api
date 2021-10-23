@@ -1,7 +1,7 @@
-const User = require("../models/user")
-const { validationResult } = require("express-validator")
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
+const User = require('../models/user')
+const { validationResult } = require('express-validator')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 /// This function does the log in process checking if the user exist and pin is valid
 /// It returns the user model if successful
@@ -21,7 +21,7 @@ exports.login = (req, res, next) => {
       if (!user) {
         return res
           .status(404)
-          .send({ error: true, message: "User does not exist" })
+          .send({ error: true, message: 'User does not exist' })
       }
       loadedUser = user
       bcrypt
@@ -47,20 +47,20 @@ exports.login = (req, res, next) => {
             }
             return res.status(200).send({
               error: false,
-              message: "User logged in successfully",
+              message: 'User logged in successfully',
               data: details,
             })
           } else if (!result) {
             return res
               .status(401)
-              .send({ error: true, message: "Incorrect pin" })
+              .send({ error: true, message: 'Incorrect pin' })
           }
         })
         .catch((err) => {
           console.log(err)
           return res.status(500).send({
             error: true,
-            message: "Database operation failed, please try again",
+            message: 'Database operation failed, please try again',
           })
         })
     })
@@ -68,7 +68,7 @@ exports.login = (req, res, next) => {
       console.log(err)
       return res.status(500).send({
         error: true,
-        message: "Database operation failed, please try again",
+        message: 'Database operation failed, please try again',
       })
     })
 }
@@ -93,7 +93,7 @@ exports.signup = (req, res, next) => {
       if (userDoc) {
         return res.status(422).send({
           error: true,
-          message: "User already exist, please pick a different phone number",
+          message: 'User already exist, please pick a different phone number',
         })
       }
       return bcrypt
@@ -110,14 +110,14 @@ exports.signup = (req, res, next) => {
         .then((result) => {
           return res
             .status(201)
-            .send({ error: false, message: "User created successfully" })
+            .send({ error: false, message: 'User created successfully' })
         })
     })
     .catch((err) => {
       console.log(err)
       return res.status(500).send({
         error: true,
-        message: "Database operation failed, please try again",
+        message: 'Database operation failed, please try again',
       })
     })
 }
@@ -128,16 +128,16 @@ exports.staffAction = async (req, res, next) => {
   const status = req.params.status
   const userId = req.params.id
   let response
-  if (status === "active") {
-    response = "activated"
-  } else if (status === "block") {
-    response = "blocked"
-  } else if (status === "delete") {
-    response = "deleted"
+  if (status === 'active') {
+    response = 'activated'
+  } else if (status === 'block') {
+    response = 'blocked'
+  } else if (status === 'delete') {
+    response = 'deleted'
   } else {
     return res
       .status(422)
-      .send({ error: true, message: "Invalid status action" })
+      .send({ error: true, message: 'Invalid status action' })
   }
   await User.findByIdAndUpdate(userId, { $set: { status: status } })
     .then((updatedUser) => {
@@ -197,7 +197,7 @@ exports.changePin = async (req, res) => {
   if (!validPin)
     return res
       .status(400)
-      .send({ error: true, message: "Current pin does not match" })
+      .send({ error: true, message: 'Current pin does not match' })
   await bcrypt.hash(newPin, 12).then((hashedPin) => {
     User.findByIdAndUpdate(
       req.userId,
@@ -211,12 +211,12 @@ exports.changePin = async (req, res) => {
       .then((updatedUser) => {
         return res
           .status(200)
-          .send({ error: false, message: "Pin updated successfully" })
+          .send({ error: false, message: 'Pin updated successfully' })
       })
       .catch((err) => {
         return res.status(404).send({
           error: true,
-          message: "The user with the given ID was not found.",
+          message: 'The user with the given ID was not found.',
         })
       })
   })
@@ -225,7 +225,7 @@ exports.changePin = async (req, res) => {
 /// This function reset pin of a user
 exports.resetPin = async (req, res) => {
   const userId = req.params.id
-  const newPin = "1234"
+  const newPin = '1234'
 
   await bcrypt.hash(newPin, 12).then((hashedPin) => {
     User.findByIdAndUpdate(
@@ -240,12 +240,12 @@ exports.resetPin = async (req, res) => {
       .then((updatedUser) => {
         return res
           .status(200)
-          .send({ error: false, message: "Pin reset successful" })
+          .send({ error: false, message: 'Pin reset successful' })
       })
       .catch((err) => {
         return res.status(404).send({
           error: true,
-          message: "The user with the given ID was not found.",
+          message: 'The user with the given ID was not found.',
         })
       })
   })
@@ -255,16 +255,16 @@ exports.resetPin = async (req, res) => {
 exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find()
-      .select(["-pin", "-__v"])
+      .select(['-pin', '-__v'])
       .sort({ createdAt: -1 })
     return res.status(200).send({
       error: false,
-      message: "Successfully fetched all users",
+      message: 'Successfully fetched all users',
       data: users,
     })
   } catch (error) {
     return res
       .status(500)
-      .send({ error: true, message: "Database operation failed" })
+      .send({ error: true, message: 'Database operation failed' })
   }
 }

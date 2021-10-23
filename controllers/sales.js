@@ -15,7 +15,7 @@ exports.fetchSales = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const sales = await Sales.find().sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    const sales = await Sales.find().select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
     const salesLength = await Sales.estimatedDocumentCount();
     const result = {
       totalCount: salesLength,
@@ -23,10 +23,10 @@ exports.fetchSales = async (req, res, next) => {
       count: limit,
       items: sales
     }
-    return res.status(200).send({error: false, message: "Successfully fetched sales", data: result })
+    return res.status(200).send({error: false, message: 'Successfully fetched sales', data: result })
   } catch (error) {
     console.log(err)
-    return res.status(500).send({ error: true, message: "Database operation failed, please try again" })
+    return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
   }
 }
 
@@ -54,9 +54,9 @@ exports.addNewSales = async(req, res, next) => {
           if (!product) {
             Sales.findByIdAndDelete(savedSales._id)
               .then(() => {
-                return res.status(401).send({ error: true, message: "Saving product failed." })
+                return res.status(401).send({ error: true, message: 'Saving product failed.' })
               })
-            return res.status(401).send({ error: true, message: "Saving product failed." })
+            return res.status(401).send({ error: true, message: 'Saving product failed.' })
           }
           Product.findByIdAndUpdate({ _id: product[0]._id }, { currentQty: (product[0].currentQty - parseFloat(quantity)) },
             function (err, result) {
@@ -64,9 +64,9 @@ exports.addNewSales = async(req, res, next) => {
                 console.log(err)
                 Sales.findByIdAndDelete(savedSales._id)
                   .then(() => {
-                    return res.status(401).send({ error: true, message: "Saving product failed." })
+                    return res.status(401).send({ error: true, message: 'Saving product failed.' })
                   })
-                return res.status(500).send({ error: true, message: "Saving product failed." })
+                return res.status(500).send({ error: true, message: 'Saving product failed.' })
               } else {
                 return res.status(200).send({ error: false, message: `${productName} was saved successfully` })
               }
@@ -79,7 +79,7 @@ exports.addNewSales = async(req, res, next) => {
         })
     })
     .catch(err => {
-      return res.status(500).send({ error: true, message: "Database operation failed, please try again" })
+      return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
     })
 }
 
@@ -88,26 +88,14 @@ exports.updateSalesReportName = async (req, res, next) => {
   const productName = req.body.productName
   const updatedName = req.body.updatedName
 
-  try {
-    await Sales.updateMany({ 'productName': productName }, {
-      $set: {
-        'productName': updatedName,
-      }
-    },
-      function (err, result) {
-        if (err) {
-          console.log(err)
-          return res.status(500).send({ error: true, message: "Updating sales product name failed." })
-        } else {
-          return res.status(200).send({ error: false, message: `Updated sales product name successfully` })
-        }
-      }
-    )
-  } catch (error) {
+  await Sales.updateMany({ 'productName': productName }, {
+    $set: { 'productName': updatedName }
+  }).then(result => {
+    return res.status(200).send({ error: false, message: `Updated sales product name successfully` })
+  }).catch(err => {
     console.log(err)
-    return res.status(500).send({ error: true, message: "Database operation failed, please try again" })
-  }
-
+    return res.status(500).send({ error: true, message: `Updating sales product name failed.` })
+  })
 }
 
 // Delete daily sales product and update product's current quantity
@@ -116,46 +104,36 @@ exports.deleteSales = (req, res, next) => {
   const customer = req.body.customerName
   const product = req.body.productName
 
-  try {
-    Sales.findById(id, function (err, sales) {
-      if (err) {
-        console.log(err)
-        return res.status(422).send({ error: true, message: "Couldn't find the sales with the id specified" })
-      }
+  Sales.findById(id).then(sales => { 
+    if(!sales) return res.status(422).send({ error: true, message: 'Couldn\'t find the sales with the id specified' })
+    else {
       if (sales.productName === product && sales.customerName === customer) {
-        Product.find({ productName: sales.productName })
-          .then(product => {
-            if (!product) {
-              return res.status(401).send({ error: true, message: "Deleting sales failed." })
-            }
-            Product.findByIdAndUpdate({ _id: product[0]._id }, { currentQty: (product[0].currentQty + sales.quantity) },
-              function (err, result) {
-                if (err) {
-                  console.log(err)
-                  return res.status(500).send({ error: true, message: "Deleted sales failed." })
-                } else {
-                  Sales.findByIdAndDelete(id, function (err, docs) {
-                    if (err) {
-                      console.log(err)
-                      return res.status(500).send({ error: true, message: "Database operation failed, please try again" })
-                    }
-                    else {
-                      return res.status(200).send({ error: false, message: `Deleted successfully` })
-                    }
-                  })
-                }
-              }
-            )
-          })
-          .catch(err => {
-            console.log(err)
-            return res.status(500).send({ error: true, message: `Database operation failed, please try again` })
-          })
+        Product.find({ productName: sales.productName }).then(product => {
+          if (!product) return res.status(401).send({ error: true, message: 'Deleting sales failed.' })
+          Product.findByIdAndUpdate({ _id: product[0]._id }, { currentQty: (product[0].currentQty + sales.quantity) })
+            .then(result => {
+              Sales.findByIdAndDelete(id).then(val => { 
+                return res.status(200).send({ error: false, message: `Deleted successfully` })
+              }).catch(err => {
+                console.log(err)
+                return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
+              })
+            })
+            .catch(err => {
+              console.log(err)
+              return res.status(500).send({ error: true, message: 'Deleted sales failed.' })
+            })
+        })
+        .catch(err => {
+          console.log(err)
+          return res.status(500).send({ error: true, message: `Database operation failed, please try again` })
+        })
       }
-    })
-  } catch (error) {
+      else return res.status(500).send({ error: true, message: 'Product name or customer does not match' })
+    }
+  }).catch(err => {
     console.log(err)
-    return res.status(422).send({ error: true, message: "Couldn't find the sales with the time specified" })
-  }
+    return res.status(422).send({ error: true, message: 'Couldn\'t find the sales with the id specified' })
+  })
   
 }

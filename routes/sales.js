@@ -5,16 +5,16 @@ const isAuth = require('../middleware/is-auth')
 const router = express.Router()
 
 // Fetch all sales from the database
-router.get('/fetchAllSales', isAuth, salesController.fetchSales)
+router.get('/fetchAll', isAuth, salesController.fetchSales)
  
 // Add new sale to the database
-router.post('/addNewSales', isAuth, salesController.addNewSales)
+router.post('/addNew', isAuth, salesController.addNewSales)
 
 // Update sales product name 
 router.put('/updateSalesName', isAuth, salesController.updateSalesReportName)
 
 // Delete a sales from the database 
-router.delete('/deleteSales', isAuth, salesController.deleteSales)
+router.delete('/delete', isAuth, salesController.deleteSales)
 
 module.exports = router
  

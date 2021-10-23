@@ -1,7 +1,7 @@
-const Product = require("../models/product")
-const ProductCategories = require("../models/productCategories")
-const ProductHistoryController = require("../controllers/productHistory")
-const { validationResult } = require("express-validator")
+const Product = require('../models/product')
+const ProductCategories = require('../models/productCategories')
+const ProductHistoryController = require('../controllers/productHistory')
+const { validationResult } = require('express-validator')
 
 // Add new product
 exports.addNewProduct = async (req, res, next) => {
@@ -39,7 +39,7 @@ exports.addNewProduct = async (req, res, next) => {
       await ProductHistoryController.addProductHistory(req, res, next)
   }).catch((err) => {
     console.log(err)
-    return res.status(500).send({error: true, message: "Database operation failed, please try again"})
+    return res.status(500).send({error: true, message: 'Database operation failed, please try again'})
   })
 }
 
@@ -56,7 +56,7 @@ exports.fetchProducts = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const products = await Product.find().populate("category").sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    const products = await Product.find().populate('category').select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
     const productsLength = await Product.estimatedDocumentCount();
     const result = {
       totalCount: productsLength,
@@ -64,21 +64,21 @@ exports.fetchProducts = async (req, res, next) => {
       count: limit,
       items: products
     }
-    return res.status(200).send({error: false, message: "Successfully fetched all products", data: result })
+    return res.status(200).send({error: false, message: 'Successfully fetched all products', data: result })
   } catch (error) {
     console.log(error)
-    return res.status(500).send({ error: true, message: "Database operation failed" })
+    return res.status(500).send({ error: true, message: 'Database operation failed' })
   }
 }
 
 // Fetch a particular product
 exports.findProduct = (req, res, next) => {
-  Product.findById(req.params.id).populate("category")
+  Product.findById(req.params.id).populate('category')
     .then((product) => {  
       if (!product) {
-        return res.status(422).send({error: true, message: "Couldn't find the product with the id specified"})
+        return res.status(422).send({error: true, message: 'Couldn\'t find the product with the id specified'})
       }
-      return res.status(200).send({error: false, message: "Product successfully fetched", data: product })
+      return res.status(200).send({error: false, message: 'Product successfully fetched', data: product })
     })
     .catch((err) => {
       console.log(err)
@@ -96,7 +96,7 @@ exports.updateProduct = (req, res, next) => {
   Product.findById(req.params.id)
     .then((product) => {
       if (!product) {
-        return res.status(422).send({error: true, message: "Couldn't find the product with the id specified" })
+        return res.status(422).send({error: true, message: 'Couldn\'t find the product with the id specified' })
       }
       Product.findByIdAndUpdate(
         req.params.id,
@@ -114,7 +114,7 @@ exports.updateProduct = (req, res, next) => {
         function (err, result) {
           if (err) {
             console.log(err)
-            return res.status(500).send({ error: true, message: "Updating product failed." })
+            return res.status(500).send({ error: true, message: 'Updating product failed.' })
           } else {
             return res.status(200).send({error: false, message: `Updated ${req.body.productName} successfully` })
           }
@@ -134,10 +134,10 @@ exports.deleteProduct = (req, res, next) => {
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
-        return res.status(422).send({error: true, message: "Couldn't find the product with the id specified" })
+        return res.status(422).send({error: true, message: 'Couldn\'t find the product with the id specified' })
       }
       if (product.productName !== productName) {
-        return res.status(422).send({error: true, message: "Product name doesn't match with the product id" })
+        return res.status(422).send({error: true, message: 'Product name doesn\'t match with the product id' })
       }
       return Product.deleteOne({ _id: prodId })
     })
@@ -146,6 +146,6 @@ exports.deleteProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err)
-      return res.status(500).send({ error: true, message: "Deleting product failed." })
+      return res.status(500).send({ error: true, message: 'Deleting product failed.' })
     })
 }

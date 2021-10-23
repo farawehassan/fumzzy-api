@@ -1,5 +1,5 @@
-const ProductHistory = require("../models/productHistory")
-const Product = require("../models/product")
+const ProductHistory = require('../models/productHistory')
+const Product = require('../models/product')
  
 // Add new product history to database
 exports.addProductHistory = async (req, res, next) => {
@@ -20,7 +20,7 @@ exports.addProductHistory = async (req, res, next) => {
   }).catch( async (err) => {
     console.log(err)
     await Product.deleteOne({ productName: req.body.productName })
-    return res.status(500).send({ error: true, message: "Database operation failed, please try again" })
+    return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
   })
 }
 
@@ -28,10 +28,10 @@ exports.addProductHistory = async (req, res, next) => {
 exports.fetchProductHistory = async (req, res, next) => {
   try {
     const products = await ProductHistory.find()
-    return res.status(200).send({error: false, message: "Product history successfully fetched", data: products, })
+    return res.status(200).send({error: false, message: 'Product history successfully fetched', data: products, })
   } catch (error) {
     console.log(err)
-    return res.status(500).send({error: true, message: "Database operation failed, please try again",})
+    return res.status(500).send({error: true, message: 'Database operation failed, please try again',})
   }
 }
 
@@ -44,14 +44,14 @@ exports.findProductHistory = (req, res, next) => {
           .status(422)
           .send({
             error: true,
-            message: "Couldn't find the product history with the id specified",
+            message: 'Couldn\'t find the product history with the id specified',
           })
       }
       return res
         .status(200)
         .send({
           error: false,
-          message: "Product history successfully fetched",
+          message: 'Product history successfully fetched',
           data: product,
         })
     })
@@ -59,7 +59,7 @@ exports.findProductHistory = (req, res, next) => {
       console.log(err)
       return res
         .status(500)
-        .send({ error: true, message: "Unable to fetch product history" })
+        .send({ error: true, message: 'Unable to fetch product history' })
     })
 }
 
@@ -78,7 +78,7 @@ exports.addNewProductToHistory = (req, res, next) => {
   ProductHistory.findById(req.body.id)
     .then((product) => {
       if (!product) {
-        return res.status(422).send({error: true, message: "Couldn't find the product with the id specified" })
+        return res.status(422).send({error: true, message: 'Couldn\'t find the product with the id specified' })
       }
       ProductHistory.findByIdAndUpdate(
         req.body.id,
@@ -86,7 +86,7 @@ exports.addNewProductToHistory = (req, res, next) => {
         function (err, result) {
           if (err) {
             console.log(err)
-            return res.status(500).send({error: true, message: "Adding history to product failed.",})
+            return res.status(500).send({error: true, message: 'Adding history to product failed.',})
           } else {
             return res.status(200).send({error: false,message: `History updated successfully`})
           }
@@ -103,14 +103,14 @@ exports.addNewProductToHistory = (req, res, next) => {
 exports.removeHistoryFromProductHistory = (req, res, next) => {
   ProductHistory.findById(req.body.productId)
     .then((product) => {
-      if (!product) return res.status(422).send({error: true, message: "Couldn't find the product with the id specified" })
+      if (!product) return res.status(422).send({error: true, message: 'Couldn\'t find the product with the id specified' })
       ProductHistory.findByIdAndUpdate(
         req.body.productId,
         { $pull: { products: { _id: req.body.historyId }}},
         function (err, result) {
           if (err) {
             console.log(err)
-            return res.status(500).send({error: true, message: "Removing history failed.",})
+            return res.status(500).send({error: true, message: 'Removing history failed.',})
           } else {
             return res.status(200).send({error: false,message: `History removed successfully`})
           }
@@ -131,7 +131,7 @@ exports.updateProductName = (req, res, next) => {
           .status(422)
           .send({
             error: true,
-            message: "Couldn't find the product with the id specified",
+            message: 'Couldn\'t find the product with the id specified',
           })
       }
       ProductHistory.findByIdAndUpdate(
@@ -144,7 +144,7 @@ exports.updateProductName = (req, res, next) => {
               .status(500)
               .send({
                 error: true,
-                message: "Updating product history failed.",
+                message: 'Updating product history failed.',
               })
           } else {
             return res
@@ -170,14 +170,14 @@ exports.deleteHistory = (req, res, next) => {
   ProductHistory.findById(req.params.id)
     .then((product) => {
       if (!product) {
-        return res.status(422).send({ error: true, message: "Couldn't find the product history with the id specified"})
+        return res.status(422).send({ error: true, message: 'Couldn\'t find the product history with the id specified'})
       }
       ProductHistory.deleteOne({ _id: req.params.id }).then(() => {
         return res.status(200).send({error: false, message: `Deleted product history successfully` })
       })
       .catch((err) => {
         console.log(err)
-        return res.status(500).send({ error: true, message: "Deleting product history failed." })
+        return res.status(500).send({ error: true, message: 'Deleting product history failed.' })
       })
     })
 }

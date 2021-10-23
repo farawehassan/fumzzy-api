@@ -4,16 +4,22 @@ const isAuth = require('../middleware/is-auth')
 const router = express.Router()
 
 // Fetch all customers from the database
-router.get('/fetchAllCustomers', isAuth, customerController.fetchCustomers)
+router.get('/fetchAll', isAuth, customerController.fetchCustomers)
 
 // Fetch a particular customer from the database
 router.get('/fetchCustomer/:id', isAuth, customerController.findCustomer)
 
-// Add new customer to the database
-router.post('/addNewCustomer', isAuth, customerController.addNewCustomer)
+// Add new customer reports to the database
+router.post('/addNew', isAuth, customerController.addNewCustomer)
+
+// Add previous customer details to the database
+router.post('/addPrevious', isAuth, customerController.addPreviousCustomer)
 
 // Add new reports of customer to the database
 router.post('/addNewCustomerReports', isAuth, customerController.addNewCustomerReport)
+
+// Add new reports of previous customer details to the database
+router.post('/addNewPreviousCustomerReports', isAuth, customerController.addNewPreviousCustomerReport)
 
 // Update a particular report details of a customer
 router.put('/updateCustomerReport', isAuth, customerController.updateCustomerReport)
@@ -25,9 +31,9 @@ router.put('/updatePaymentMadeReport', isAuth, customerController.updatePaymentM
 router.put('/settlePaymentReport', isAuth, customerController.settlePaymentReport)
 
 // Delete a customer's report
-router.put('/deleteCustomerReport', isAuth, customerController.removeCustomerReport) 
+router.put('/removeCustomerReport', isAuth, customerController.removeCustomerReport) 
  
 // Delete a customer 
-router.delete('/deleteCustomer/:id', isAuth, customerController.deleteCustomer) 
+router.delete('/delete/:id', isAuth, customerController.deleteCustomer) 
  
 module.exports = router

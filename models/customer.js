@@ -14,8 +14,9 @@ const customerSchema = new Schema({
       paymentMade: { type: Number, required: true },
       paid: { type: Boolean, required: true },
       soldAt: { type: String, required: true },
-      dueDate: { type: String },
-      paymentReceivedAt: String
+      dueDate: String,
+      paymentReceivedAt: String,
+      description: String
     }
   ],
 }, { timestamps: true }

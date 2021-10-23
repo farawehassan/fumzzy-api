@@ -48,7 +48,31 @@ await Customer.create({
     })
     .catch(err => {
       console.log(err)
-      return res.status(500).send({ error: true, message: "Database operation failed, please try again" })
+      return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
+    })
+}
+
+// Add new customer
+exports.addPreviousCustomer = async (req, res, next) => {
+  const reports = {
+    report: [],
+    totalAmount: req.body.totalAmount,
+    paymentMade: 0,
+    paid: false,
+    soldAt: req.body.soldAt,
+    dueDate: req.body.dueDate,
+    description: req.body.description
+  }
+
+  await Customer.create({
+    name: req.body.name,
+    reports: [reports]
+  }).then(result => {
+      return res.status(200).send({ error: false, message: `Customer was successfully added`, data: result })
+    })
+    .catch(err => {
+      console.log(err)
+      return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
     })
 }
 
@@ -65,7 +89,7 @@ exports.fetchCustomers = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const customers = await Customer.find().sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    const customers = await Customer.find().select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
     const customersLength = await Customer.estimatedDocumentCount();
     const result = {
       totalCount: customersLength,
@@ -73,22 +97,22 @@ exports.fetchCustomers = async (req, res, next) => {
       count: limit,
       items: customers
     }
-    return res.status(200).send({error: false, message: "Successfully fetched customers", data: result })
+    return res.status(200).send({error: false, message: 'Successfully fetched customers', data: result })
   } catch (error) {
     console.log(err)
-    return res.status(500).send({ error: true, message: "Database operation failed, please try again" })
+    return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
   }
 
 }
 
 // Fetch a particular customer
 exports.findCustomer = (req, res, next) => {
-  Customer.findById(req.params.id)
+  Customer.findById(req.params.id).select(['-__v'])
     .then(customer => {
       if (!customer) {
-        return res.status(422).send({ error: true, message: "Couldn't find the customer with the id specified" })
+        return res.status(422).send({ error: true, message: 'Couldn\'t find the customer with the id specified' })
       }
-      return res.status(200).send({ error: false, message: "Customer successfully fetched", data: customer })
+      return res.status(200).send({ error: false, message: 'Customer successfully fetched', data: customer })
     })
     .catch(err => {
       console.log(err)
@@ -138,13 +162,49 @@ exports.addNewCustomerReport = (req, res, next) => {
   Customer.findById(customerId)
     .then(customer => {
       if (!customer) {
-        return res.status(422).send({ error: true, message: "Couldn't find the customer with the id specified" })
+        return res.status(422).send({ error: true, message: 'Couldn\'t find the customer with the id specified' })
       }
       Customer.findByIdAndUpdate(customerId, { $push: { reports: newReports } },
         function (err, result) {
           if (err) {
             console.log(err)
-            return res.status(500).send({ error: true, message: "Adding reports to customer failed." })
+            return res.status(500).send({ error: true, message: 'Adding reports to customer failed.' })
+          } else {
+            return res.status(200).send({ error: false, message: `Reports updated successfully for ${customer.name}` })
+          }
+        }
+      )
+    })
+    .catch(err => {
+      console.log(err)
+      return res.status(500).send({ error: true, message: `Unable to fetch customer` })
+    })
+}
+
+// Add new customer
+exports.addNewPreviousCustomerReport = async (req, res, next) => {
+  const customerId = req.body.id
+
+  const reports = {
+    report: [],
+    totalAmount: req.body.totalAmount,
+    paymentMade: 0,
+    paid: false,
+    soldAt: req.body.soldAt,
+    dueDate: req.body.dueDate,
+    description: req.body.description
+  }
+
+  Customer.findById(customerId)
+    .then(customer => {
+      if (!customer) {
+        return res.status(422).send({ error: true, message: 'Couldn\'t find the customer with the id specified' })
+      }
+      Customer.findByIdAndUpdate(customerId, { $push: { reports: [reports] } },
+        function (err, result) {
+          if (err) {
+            console.log(err)
+            return res.status(500).send({ error: true, message: 'Adding reports to customer failed.' })
           } else {
             return res.status(200).send({ error: false, message: `Reports updated successfully for ${customer.name}` })
           }
@@ -168,7 +228,7 @@ exports.updateCustomerReport = (req, res, next) => {
   Customer.findById(customerId)
     .then(customer => {
       if (!customer) {
-        return res.status(422).send({ error: true, message: "Couldn't find the customer with the id specified" })
+        return res.status(422).send({ error: true, message: 'Couldn\'t find the customer with the id specified' })
       }
       Customer.findOneAndUpdate({ 'reports._id': reportId }, {
         $set: {
@@ -180,7 +240,7 @@ exports.updateCustomerReport = (req, res, next) => {
         function (err, result) {
           if (err) {
             console.log(err)
-            return res.status(500).send({ error: true, message: "Updating payment to report failed." })
+            return res.status(500).send({ error: true, message: 'Updating payment to report failed.' })
           } else {
             return res.status(200).send({ error: false, message: `Report updated successfully for ${customer.name}` })
           }
@@ -202,13 +262,13 @@ exports.updatePaymentMadeReport = (req, res, next) => {
   Customer.findById(customerId)
     .then(customer => {
       if (!customer) {
-        return res.status(422).send({ error: true, message: "Couldn't find the customer with the id specified" })
+        return res.status(422).send({ error: true, message: 'Couldn\'t find the customer with the id specified' })
       }
       Customer.findOneAndUpdate({ 'reports._id': reportId }, { $set: { 'reports.$.paymentMade': payment } },
         function (err, result) {
           if (err) {
             console.log(err)
-            return res.status(500).send({ error: true, message: "Updating payment to report failed." })
+            return res.status(500).send({ error: true, message: 'Updating payment to report failed.' })
           } else {
             return res.status(200).send({ error: false, message: `Payment updated successfully for ${customer.name}` })
           }
@@ -231,7 +291,7 @@ exports.settlePaymentReport = (req, res, next) => {
   Customer.findById(customerId)
     .then(customer => {
       if (!customer) {
-        return res.status(422).send({ error: true, message: "Couldn't find the customer with the id specified" })
+        return res.status(422).send({ error: true, message: 'Couldn\'t find the customer with the id specified' })
       }
       Customer.findOneAndUpdate({ 'reports._id': reportId }, {
         $set: {
@@ -243,7 +303,7 @@ exports.settlePaymentReport = (req, res, next) => {
         function (err, result) {
           if (err) {
             console.log(err)
-            return res.status(500).send({ error: true, message: "Updating payment to report failed." })
+            return res.status(500).send({ error: true, message: 'Updating payment to report failed.' })
           } else {
             return res.status(200).send({ error: false, message: `Payment settled successfully for ${customer.name}` })
           }
@@ -263,7 +323,7 @@ exports.deleteCustomer = (req, res, next) => {
   Customer.findById(customerId)
     .then(customer => {
       if (!customer) {
-        return res.status(422).send({ error: true, message: "Couldn't find the customer with the id specified" })
+        return res.status(422).send({ error: true, message: 'Couldn\'t find the customer with the id specified' })
       }
       return Customer.deleteOne({ _id: customerId })
     })
@@ -271,7 +331,7 @@ exports.deleteCustomer = (req, res, next) => {
       return res.status(200).send({ error: false, message: `Deleted customer successfully` })
     })
     .catch(err => {
-      return res.status(500).send({ error: true, message: "Deleting customer failed." })
+      return res.status(500).send({ error: true, message: 'Deleting customer failed.' })
     })
 }
 
@@ -280,11 +340,11 @@ exports.removeCustomerReport = (req, res, next) => {
   const customerId = req.body.customerId
   const reportId = req.body.reportId
 
-  Customer.updateOne({ _id: customerId }, { "$pull": { "reports": { "_id": reportId } } },
+  Customer.updateOne({ _id: customerId }, { '$pull': { 'reports': { '_id': reportId } } },
    { safe: true, multi: true }, function (err, obj) {
     if (err) {
       console.log(err)
-      return res.status(500).send({ error: true, message: "Deleting customer sales failed." })
+      return res.status(500).send({ error: true, message: 'Deleting customer sales failed' })
     } else {
       return res.status(200).send({ error: false, message: `Deleted successfully` })
     }

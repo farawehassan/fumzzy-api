@@ -1,5 +1,5 @@
-const Expenses = require("../models/expenses")
-const { validationResult } = require("express-validator")
+const Expenses = require('../models/expenses')
+const { validationResult } = require('express-validator')
 
 /// This function creates a new expenses the staff makes 
 exports.create = async (req, res, next) => {
@@ -24,13 +24,13 @@ exports.create = async (req, res, next) => {
         .status(201)
         .send({
           error: false,
-          message: "Successfully added expenses",
+          message: 'Successfully added expenses',
           data: expenses,
         })
     })
     .catch((err) => {
       console.log(err)
-      return res.status(500).send({ error: true, message: "Error occurred" })
+      return res.status(500).send({ error: true, message: 'Error occurred' })
     })
 }
 
@@ -50,20 +50,20 @@ exports.delete = async (req, res, next) => {
 exports.getExpenses = async (req, res, next) => {
   try {
     const expenses = await Expenses.find()
-      .select(["-__v"])
-      .populate('staff', "-pin -__v")
+      .select(['-__v'])
+      .populate('staff', '-pin -__v')
       .sort({ createdAt: -1 })
     return res
       .status(200)
       .send({
         error: false,
-        message: "Successfully fetched all expenses",
+        message: 'Successfully fetched all expenses',
         data: expenses,
       })
   } catch (error) {
     console.log(error)
     return res
       .status(500)
-      .send({ error: true, message: "Database operation failed" })
+      .send({ error: true, message: 'Database operation failed' })
   }
 }
