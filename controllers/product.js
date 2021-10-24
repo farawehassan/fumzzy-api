@@ -34,6 +34,8 @@ exports.addNewProduct = async (req, res, next) => {
   }).then(async(value) => {
     await Purchases.create({
       product: value.id,
+      costPrice: req.body.costPrice,
+      sellingPrice: req.body.sellingPrice,
       quantity: req.body.quantity,
     }).then(async(result) => {
       return res.status(200).send({ error: false, message: `${req.body.productName} was successfully added` })
@@ -128,6 +130,8 @@ exports.updateProduct = (req, res, next) => {
           if(req.body.quantity){
             await Purchases.create({
               product: req.params.id,
+              costPrice: req.body.costPrice,
+              sellingPrice: req.body.sellingPrice,
               quantity: req.body.quantity,
             }).then(async(value) => {
               return res.status(200).send({error: false, message: `Updated ${req.body.productName} successfully` })

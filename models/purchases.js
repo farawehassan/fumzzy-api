@@ -8,6 +8,14 @@ const purchasesSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Products',
     },
+    costPrice: {
+      type: Number,
+      required: true,
+    },
+    sellingPrice: {
+      type: Number,
+      required: true,
+    },
     quantity: {
       type: Number,
       required: true,
