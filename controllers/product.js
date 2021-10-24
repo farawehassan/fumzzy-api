@@ -1,16 +1,12 @@
 const Product = require('../models/product')
+const Purchases = require('../models/purchases')
 const ProductCategories = require('../models/productCategories')
-const ProductHistoryController = require('../controllers/productHistory')
 const { validationResult } = require('express-validator')
 
 // Add new product
 exports.addNewProduct = async (req, res, next) => {
   const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .send({ error: true, message: errors.array()[0].msg })
-  }
+  if (!errors.isEmpty()) return res.status(422).send({ error: true, message: errors.array()[0].msg })
 
   const product = await Product.findOne({productName: req.body.productName})
   if(product != null) return res.status(422).send({ error: 'true', message: 'Product exists already' })
@@ -36,14 +32,19 @@ exports.addNewProduct = async (req, res, next) => {
     currentQty: req.body.currentQty,
     sellersName: req.body.sellersName,
   }).then(async(value) => {
-      await ProductHistoryController.addProductHistory(req, res, next)
+    await Purchases.create({
+      product: value.id,
+      quantity: req.body.quantity,
+    }).then(async(result) => {
+      return res.status(200).send({ error: false, message: `${req.body.productName} was successfully added` })
+    }) 
   }).catch((err) => {
     console.log(err)
     return res.status(500).send({error: true, message: 'Database operation failed, please try again'})
   })
 }
 
-// Fetch all available products
+// Fetch products paginated
 exports.fetchProducts = async (req, res, next) => {
   try {
     let page
@@ -71,6 +72,17 @@ exports.fetchProducts = async (req, res, next) => {
   }
 }
 
+// Fetch all products
+exports.fetchAllProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find().populate('category').select(['-__v']).sort({ createdAt: -1 })
+    return res.status(200).send({error: false, message: 'Successfully fetched all products', data: products })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ error: true, message: 'Database operation failed' })
+  }
+}
+
 // Fetch a particular product
 exports.findProduct = (req, res, next) => {
   Product.findById(req.params.id).populate('category')
@@ -90,9 +102,8 @@ exports.findProduct = (req, res, next) => {
 // add another quantity if another quantity of the same product is added
 exports.updateProduct = (req, res, next) => {
   const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res.status(422).send({ status: 422, error: true, message: errors.array()[0].msg })
-  }
+  if (!errors.isEmpty()) return res.status(422).send({ status: 422, error: true, message: errors.array()[0].msg })
+  
   Product.findById(req.params.id)
     .then((product) => {
       if (!product) {
@@ -110,16 +121,24 @@ exports.updateProduct = (req, res, next) => {
             currentQty: req.body.currentQty,
             sellersName: req.body.sellersName,
           },
-        },
-        function (err, result) {
-          if (err) {
-            console.log(err)
-            return res.status(500).send({ error: true, message: 'Updating product failed.' })
-          } else {
-            return res.status(200).send({error: false, message: `Updated ${req.body.productName} successfully` })
+        }).then(async(product) => {  
+          if (!product) {
+            return res.status(422).send({error: true, message: 'Couldn\'t find the product with the id specified'})
           }
-        }
-      )
+          if(req.body.quantity){
+            await Purchases.create({
+              product: req.params.id,
+              quantity: req.body.quantity,
+            }).then(async(value) => {
+              return res.status(200).send({error: false, message: `Updated ${req.body.productName} successfully` })
+            })  
+          } 
+          else return res.status(200).send({error: false, message: `Updated ${req.body.productName} successfully` })
+        })
+        .catch((err) => {
+          console.log(err)
+          return res.status(500).send({ error: true, message: 'Updating product failed.' })
+        })
     })
     .catch((err) => {
       console.log(err)

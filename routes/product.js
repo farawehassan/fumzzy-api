@@ -4,8 +4,11 @@ const controller = require('../controllers/product')
 const isAuth = require('../middleware/is-auth')
 const router = express.Router()
 
-// Fetch all available products from the database
+// Fetch all available products from the database - paginated
 router.get('/fetchAll', isAuth, controller.fetchProducts)
+
+// Fetch all available products from the database
+router.get('/fetchAllProducts', isAuth, controller.fetchAllProducts)
 
 // Fetch a particular product from the database
 router.get('/fetch/:id', isAuth, controller.findProduct)
@@ -31,26 +34,6 @@ router.post(
         }
         return true
       }),
-    body('initialQty')
-      .trim()
-      .custom((value, { req }) => {
-        if (parseFloat(value) < parseFloat(req.body.currentQty)) {
-          throw new Error(
-            'Initial quantity cannot be lesser than current quantity'
-          )
-        }
-        return true
-      }),
-    body('currentQty')
-      .trim()
-      .custom((value, { req }) => {
-        if (parseFloat(value) > parseFloat(req.body.initialQty)) {
-          throw new Error(
-            'Current quantity cannot be greater than the initial quantity'
-          )
-        }
-        return true
-      }),
   ],
   controller.addNewProduct
 )
@@ -73,26 +56,6 @@ router.put(
       .custom((value, { req }) => {
         if (parseFloat(value) < parseFloat(req.body.costPrice)) {
           throw new Error('Selling price cannot be lesser than the cost price')
-        }
-        return true
-      }),
-    body('initialQty')
-      .trim()
-      .custom((value, { req }) => {
-        if (parseFloat(value) < parseFloat(req.body.currentQty)) {
-          throw new Error(
-            'Initial quantity cannot be lesser than current quantity'
-          )
-        }
-        return true
-      }),
-    body('currentQty')
-      .trim()
-      .custom((value, { req }) => {
-        if (parseFloat(value) > parseFloat(req.body.initialQty)) {
-          throw new Error(
-            'Current quantity cannot be greater than the initial quantity'
-          )
         }
         return true
       }),
