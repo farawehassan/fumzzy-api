@@ -6,6 +6,7 @@ exports.addNewCustomer = async (req, res, next) => {
   const name = req.body.name
 
   const report = req.body.report
+  const discount = req.body.discount
   const totalAmount = req.body.totalAmount
   const paymentMade = req.body.paymentMade
   const paid = req.body.paid
@@ -19,6 +20,7 @@ exports.addNewCustomer = async (req, res, next) => {
     dueDate = req.body.dueDate
     reports = {
       report: report,
+      discount: discount,
       totalAmount: totalAmount,
       paymentMade: paymentMade,
       paid: paid,
@@ -30,6 +32,7 @@ exports.addNewCustomer = async (req, res, next) => {
     paymentReceivedAt = req.body.paymentReceivedAt
     reports = {
       report: report,
+      discount: discount,
       totalAmount: totalAmount,
       paymentMade: paymentMade,
       paid: paid,
@@ -136,6 +139,7 @@ exports.addNewCustomerReport = (req, res, next) => {
   const customerId = req.body.id
 
   const report = req.body.report
+  const discount = req.body.discount
   const totalAmount = req.body.totalAmount
   const paymentMade = req.body.paymentMade
   const paid = req.body.paid
@@ -149,6 +153,7 @@ exports.addNewCustomerReport = (req, res, next) => {
     dueDate = req.body.dueDate
     reports = {
       report: report,
+      discount: discount,
       totalAmount: totalAmount,
       paymentMade: paymentMade,
       paid: paid,
@@ -160,6 +165,7 @@ exports.addNewCustomerReport = (req, res, next) => {
     paymentReceivedAt = req.body.paymentReceivedAt
     reports = {
       report: report,
+      discount: discount,
       totalAmount: totalAmount,
       paymentMade: paymentMade,
       paid: paid,
