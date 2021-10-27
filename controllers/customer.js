@@ -3,80 +3,86 @@ const { validationResult } = require('express-validator')
 
 // Add new customer
 exports.addNewCustomer = async (req, res, next) => {
-  const name = req.body.name
+  const customer = await Customer.findOne({name: req.body.name})
+  if(customer) await addNewCustomerReport(req, res, next)
+  else {
+    const name = req.body.name
 
-  const report = req.body.report
-  const discount = req.body.discount
-  const totalAmount = req.body.totalAmount
-  const paymentMade = req.body.paymentMade
-  const paid = req.body.paid
-  const soldAt = req.body.soldAt
-  var dueDate
-  var paymentReceivedAt
-
-  var reports
-
-  if (req.body.dueDate) {
-    dueDate = req.body.dueDate
-    reports = {
-      report: report,
-      discount: discount,
-      totalAmount: totalAmount,
-      paymentMade: paymentMade,
-      paid: paid,
-      soldAt: soldAt,
-      dueDate: dueDate,
+    const report = req.body.report
+    const discount = req.body.discount
+    const totalAmount = req.body.totalAmount
+    const paymentMade = req.body.paymentMade
+    const paid = req.body.paid
+    const soldAt = req.body.soldAt
+    var dueDate
+    var paymentReceivedAt
+  
+    var reports
+  
+    if (req.body.dueDate) {
+      dueDate = req.body.dueDate
+      reports = {
+        report: report,
+        discount: discount,
+        totalAmount: totalAmount,
+        paymentMade: paymentMade,
+        paid: paid,
+        soldAt: soldAt,
+        dueDate: dueDate,
+      }
     }
-  }
-  else if (req.body.paymentReceivedAt) {
-    paymentReceivedAt = req.body.paymentReceivedAt
-    reports = {
-      report: report,
-      discount: discount,
-      totalAmount: totalAmount,
-      paymentMade: paymentMade,
-      paid: paid,
-      soldAt: soldAt,
-      paymentReceivedAt: paymentReceivedAt,
+    else if (req.body.paymentReceivedAt) {
+      paymentReceivedAt = req.body.paymentReceivedAt
+      reports = {
+        report: report,
+        discount: discount,
+        totalAmount: totalAmount,
+        paymentMade: paymentMade,
+        paid: paid,
+        soldAt: soldAt,
+        paymentReceivedAt: paymentReceivedAt,
+      }
     }
-  }
-
-  const newReports = [reports]
-
-await Customer.create({
-    name: name,
-    reports: newReports
-  }).then(result => {
+  
+    const newReports = [reports]
+  
+    await Customer.create({
+      name: name,
+      reports: newReports
+    }).then(result => {
       return res.status(200).send({ error: false, message: `Customer was successfully added`, data: result })
-    })
-    .catch(err => {
+    }).catch(err => {
       console.log(err)
       return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
     })
+  }
 }
 
 // Add new customer
 exports.addPreviousCustomer = async (req, res, next) => {
-  const reports = {
-    report: [],
-    totalAmount: req.body.totalAmount,
-    paymentMade: 0,
-    paid: false,
-    soldAt: req.body.soldAt,
-    dueDate: req.body.dueDate,
-    description: req.body.description
-  }
-
-  await Customer.create({
-    name: req.body.name,
-    reports: [reports]
-  }).then(result => {
+  const customer = await Customer.findOne({name: req.body.name})
+  if(customer) await addNewPreviousCustomerReport(req, res, next)
+  else {
+    const reports = {
+      report: [],
+      totalAmount: req.body.totalAmount,
+      paymentMade: 0,
+      paid: false,
+      soldAt: req.body.soldAt,
+      dueDate: req.body.dueDate,
+      description: req.body.description
+    }
+  
+    await Customer.create({
+      name: req.body.name,
+      reports: [reports]
+    }).then(result => {
       return res.status(200).send({ error: false, message: `Customer was successfully added`, data: result })
-    })
-    .catch(err => {
+    }).catch(err => {
       console.log(err)
       return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
     })
+  }
 }
 
 // Fetch all customers
