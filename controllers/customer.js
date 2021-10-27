@@ -105,6 +105,17 @@ exports.fetchCustomers = async (req, res, next) => {
 
 }
 
+// Fetch all customers
+exports.fetchCustomersName = async (req, res, next) => {
+  try {
+    const customers = await Customer.find().select(['-reports', '-createdAt', '-updatedAt', '-__v']).sort({ createdAt: -1 })
+    return res.status(200).send({error: false, message: 'Successfully fetched customers', data: customers })
+  } catch (error) {
+    console.log(err)
+    return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
+  }
+}
+
 // Fetch a particular customer
 exports.findCustomer = (req, res, next) => {
   Customer.findById(req.params.id).select(['-__v'])
