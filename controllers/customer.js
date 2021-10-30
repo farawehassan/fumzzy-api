@@ -98,7 +98,7 @@ exports.fetchCustomers = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const customers = await Customer.find().select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    const customers = await Customer.find().select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
     const customersLength = await Customer.estimatedDocumentCount();
     const result = {
       totalCount: customersLength,
@@ -107,6 +107,35 @@ exports.fetchCustomers = async (req, res, next) => {
       items: customers
     }
     return res.status(200).send({error: false, message: 'Successfully fetched customers', data: result })
+  } catch (error) {
+    console.log(err)
+    return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
+  }
+
+}
+
+// Fetch all customers
+exports.fetchDebtors = async (req, res, next) => {
+  try {
+    let page
+    if(req.query.page == null) page = 1
+    else page = parseInt(req.query.page)
+
+    let limit
+    if(req.query.limit == null) limit = 15
+    else limit = parseInt(req.query.limit)
+    
+    const skipIndex = (page - 1) * limit
+
+    const customers = await Customer.find({ 'reports.paid': false }).select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
+    const customersLength = await Customer.estimatedDocumentCount();
+    const result = {
+      totalCount: customersLength,
+      page: page,
+      count: limit,
+      items: customers
+    }
+    return res.status(200).send({error: false, message: 'Successfully fetched debtors', data: result })
   } catch (error) {
     console.log(err)
     return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })

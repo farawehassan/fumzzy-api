@@ -6,6 +6,9 @@ const router = express.Router()
 // Fetch all customers from the database
 router.get('/fetchAll', isAuth, customerController.fetchCustomers)
 
+// Fetch all debtors from the database
+router.get('/fetchAllDebtors', isAuth, customerController.fetchDebtors)
+
 // Fetch all customers name from the database
 router.get('/fetchCustomersName', isAuth, customerController.fetchCustomersName)
 
