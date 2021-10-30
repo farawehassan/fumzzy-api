@@ -47,7 +47,8 @@ exports.addNewSales = async(req, res, next) => {
     costPrice: costPrice,
     unitPrice: unitPrice,
     totalPrice: totalPrice,
-    paymentMode: paymentMode
+    paymentMode: paymentMode,
+    staff: req.name
   }).then(savedSales => {
       Product.find({ productName: productName })
         .then(product => {

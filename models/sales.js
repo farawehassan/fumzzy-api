@@ -31,6 +31,10 @@ const salesSchema = new Schema({
     type: String,
     required: true,
   },
+  staff: {
+    type: String,
+    required: true,
+  },
 }, { timestamps: true }
 )
 
