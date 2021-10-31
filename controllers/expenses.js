@@ -49,21 +49,27 @@ exports.delete = async (req, res, next) => {
 /// This function gets all the expenses in the Expenses table
 exports.getExpenses = async (req, res, next) => {
   try {
-    const expenses = await Expenses.find()
-      .select(['-__v'])
-      .populate('staff', '-pin -__v')
-      .sort({ createdAt: -1 })
-    return res
-      .status(200)
-      .send({
-        error: false,
-        message: 'Successfully fetched all expenses',
-        data: expenses,
-      })
+    let page
+    if(req.query.page == null) page = 1
+    else page = parseInt(req.query.page)
+
+    let limit
+    if(req.query.limit == null) limit = 15
+    else limit = parseInt(req.query.limit)
+    
+    const skipIndex = (page - 1) * limit
+
+    const expenses = await Expenses.find().select(['-__v']).populate('staff', '-pin -__v').sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    const expensesLength = await Expenses.estimatedDocumentCount();
+    const result = {
+      totalCount: expensesLength,
+      page: page,
+      count: limit,
+      items: expenses
+    }
+    return res.status(200).send({error: false, message: 'Successfully fetched creditors', data: result })
   } catch (error) {
-    console.log(error)
-    return res
-      .status(500)
-      .send({ error: true, message: 'Database operation failed' })
+    console.log(err)
+    return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
   }
 }
