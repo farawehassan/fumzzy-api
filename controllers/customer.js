@@ -127,7 +127,7 @@ exports.fetchDebtors = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const customers = await Customer.find({ 'reports.paid': false }).select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
+    const customers = await Customer.find({ 'reports.paid': false }).select(['-__v']).sort({ 'reports.dueDate': -1 }).limit(limit).skip(skipIndex).exec()
     const customersLength = await Customer.estimatedDocumentCount();
     const result = {
       totalCount: customersLength,

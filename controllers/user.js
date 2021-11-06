@@ -11,18 +11,14 @@ exports.login = (req, res, next) => {
   let loadedUser
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .send({ error: true, message: errors.array()[0].msg })
+    return res.status(422).send({ error: true, message: errors.array()[0].msg })
   }
 
   User.findOne({ name: name })
     .then((user) => {
-      if (!user) {
-        return res
-          .status(404)
-          .send({ error: true, message: 'User does not exist' })
-      }
+      if (!user) return res.status(404).send({ error: true, message: 'User does not exist' })
+      if (user.status !== 'active') return res.status(404).send({ error: true, message: 'You do not have access to use the app.' })
+      
       loadedUser = user
       bcrypt
         .compare(pin, user.pin)
@@ -45,31 +41,20 @@ exports.login = (req, res, next) => {
               updatedAt: loadedUser.updatedAt,
               token: token,
             }
-            return res.status(200).send({
-              error: false,
-              message: 'User logged in successfully',
-              data: details,
-            })
-          } else if (!result) {
-            return res
-              .status(401)
-              .send({ error: true, message: 'Incorrect pin' })
+            return res.status(200).send({ error: false, message: 'User logged in successfully', data: details })
+          } 
+          else if (!result) {
+            return res.status(401).send({ error: true, message: 'Incorrect pin' })
           }
         })
         .catch((err) => {
           console.log(err)
-          return res.status(500).send({
-            error: true,
-            message: 'Database operation failed, please try again',
-          })
+          return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
         })
     })
     .catch((err) => {
       console.log(err)
-      return res.status(500).send({
-        error: true,
-        message: 'Database operation failed, please try again',
-      })
+      return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
     })
 }
 
