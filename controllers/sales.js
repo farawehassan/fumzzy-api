@@ -1,6 +1,5 @@
 const Sales = require('../models/sales')
 const Product = require('../models/product')
-// const Customer = require('../models/customer')
 
 // Fetch all sales - paginated
 exports.fetchSales = async (req, res, next) => {

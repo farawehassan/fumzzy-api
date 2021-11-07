@@ -2,6 +2,8 @@ const Product = require('../models/product');
 const Sales = require('../models/sales');
 const Purchases = require('../models/purchases');
 const Expenses = require('../models/expenses');
+const Customer = require('../models/customer');
+const Creditors = require('../models/creditor');
 
 // Fetch store details
 exports.fetchDetails = async (req, res, next) => {
@@ -14,27 +16,54 @@ exports.fetchDetails = async (req, res, next) => {
   let totalExpenses = 0.00;
   let totalProfitMade = 0.00;
 
-  try {
-    const products = await Product.find();
-    const sales = await Sales.find();
-    const purchases = await Purchases.find();
-    const expenses = await Expenses.find();
+  let outstandingSales = 0.00;
+  let outstandingPurchase = 0.00;
 
+  try {
+    const products = await Product.find()
+    const sales = await Sales.find()
+    const purchases = await Purchases.find()
+    const expenses = await Expenses.find()
+    const customers = await Customer.find({ 'reports.paid': false })
+    const creditors = await Creditors.find()
+
+
+    /// Products section
     for (i = 0; i < products.length; i++) {
-      cpNetWorth += parseFloat(products[i].costPrice) * parseFloat(products[i].currentQty);
-      spNetWorth += parseFloat(products[i].sellingPrice) * parseFloat(products[i].currentQty);
-      totalItems += parseFloat(products[i].currentQty);
+      cpNetWorth += parseFloat(products[i].costPrice) * parseFloat(products[i].currentQty)
+      spNetWorth += parseFloat(products[i].sellingPrice) * parseFloat(products[i].currentQty)
+      totalItems += parseFloat(products[i].currentQty)
     }
+
+    /// Sales section
     for (i = 0; i < sales.length; i++) {
       totalSalesMade += parseFloat(sales[i].totalPrice);
-      totalProfitMade += parseFloat(sales[i].quantity) * (parseFloat(sales[i].unitPrice) - parseFloat(sales[i].costPrice));
+      totalProfitMade += parseFloat(sales[i].quantity) * (parseFloat(sales[i].unitPrice) - parseFloat(sales[i].costPrice))
     }
+
+    /// Purchases section
     for (i = 0; i < purchases.length; i++) {
       totalPurchases += parseFloat(purchases[i].costPrice);
     }
-    for (i = 0; i < expenses.length; i++) {
-      totalExpenses += parseFloat(expenses[i].amount);
+
+    /// Expenses section
+    for (i = 0; i < expenses.length; i++) totalExpenses += parseFloat(expenses[i].amount)
+    
+    /// Customer section
+    for (i = 0; i < customers.length; i++) { 
+      for(j = 0; j < customers[i].reports.length; j++) {
+        outstandingSales += (parseFloat(customers[i].reports[j].totalAmount) - parseFloat(customers[i].reports[j].paymentMade)) 
+      }
     }
+
+    /// Creditor section
+    for (i = 0; i < creditors.length; i++) { 
+      for(j = 0; j < creditors[i].reports.length; j++) {
+        outstandingPurchase += parseFloat(creditors[i].reports[j].amount)
+      }
+    }
+    
+    
     var storeDetails =  {
       inventoryCostPrice: cpNetWorth,
       inventorySellingPrice: spNetWorth,
@@ -44,7 +73,9 @@ exports.fetchDetails = async (req, res, next) => {
       totalSales: totalSalesMade,
       totalPurchases: totalPurchases,
       totalExpenses: totalExpenses,
-      totalProfitMade: totalProfitMade
+      totalProfitMade: totalProfitMade,
+      outstandingSales: outstandingSales,
+      outstandingPurchase: outstandingPurchase
     }; 
     return res.status(200).send({ error: false, message: 'Store details successfully fetched', data: storeDetails }); 
   } catch (error) {
