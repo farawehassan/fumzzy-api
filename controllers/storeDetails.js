@@ -17,7 +17,9 @@ exports.fetchDetails = async (req, res, next) => {
   let totalProfitMade = 0.00;
 
   let outstandingSales = 0.00;
+  let outstandingSalesVolume = 0;
   let outstandingPurchase = 0.00;
+  let outstandingPurchaseVolume = 0;
 
   try {
     const products = await Product.find()
@@ -53,6 +55,7 @@ exports.fetchDetails = async (req, res, next) => {
     for (i = 0; i < customers.length; i++) { 
       for(j = 0; j < customers[i].reports.length; j++) {
         outstandingSales += (parseFloat(customers[i].reports[j].totalAmount) - parseFloat(customers[i].reports[j].paymentMade)) 
+        outstandingSalesVolume += 1
       }
     }
 
@@ -60,6 +63,7 @@ exports.fetchDetails = async (req, res, next) => {
     for (i = 0; i < creditors.length; i++) { 
       for(j = 0; j < creditors[i].reports.length; j++) {
         outstandingPurchase += parseFloat(creditors[i].reports[j].amount)
+        outstandingPurchaseVolume += 1
       }
     }
     
@@ -75,7 +79,9 @@ exports.fetchDetails = async (req, res, next) => {
       totalExpenses: totalExpenses,
       totalProfitMade: totalProfitMade,
       outstandingSales: outstandingSales,
-      outstandingPurchase: outstandingPurchase
+      outstandingSalesVolume: outstandingSalesVolume,
+      outstandingPurchase: outstandingPurchase,
+      outstandingPurchaseVolume: outstandingPurchaseVolume
     }; 
     return res.status(200).send({ error: false, message: 'Store details successfully fetched', data: storeDetails }); 
   } catch (error) {
