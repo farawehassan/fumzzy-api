@@ -34,15 +34,24 @@ exports.fetchDetails = async (req, res, next) => {
 
     //get expenses by date
 
-    const get_date = Helpers.get_current_timestamp(7)
+    // const get_date = Helpers.get_current_timestamp(7)
 
-    const newExpenses = await Expenses.aggregate[{
-        $match: {
-            createdAt: {
-                $lte: get_date
-            }
-        }
-    }]
+    // const newExpenses = await Expenses.aggregate[
+    //     {
+    //     $match: {
+    //         createdAt: {
+    //             $gte: start_date,
+    //             $lte: end_date         
+    //         }
+    //     }
+    //    },
+    //     {
+    //         $group: {
+    //           _id: null,
+    //           total: { $sum: "$amount" }  //to get the total amount of expenses by date
+    //         },
+    //     }
+    // ]
 
     //this gets data weekly 
 
