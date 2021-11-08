@@ -6,4 +6,7 @@ const router = express.Router()
 // Fetch the store details from the server
 router.get('/fetchDetails', isAuth, storeDetailsController.fetchDetails)
 
+// Fetch the store details from the server
+router.get('/fetchDetailsChart', isAuth, storeDetailsController.fetchDetailsChart)
+
 module.exports = router;
