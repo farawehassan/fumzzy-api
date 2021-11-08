@@ -5,6 +5,8 @@ const Expenses = require('../models/expenses');
 const Customer = require('../models/customer');
 const Creditors = require('../models/creditor');
 
+const Helpers = require("../helpers/helper");
+
 // Fetch store details
 exports.fetchDetails = async (req, res, next) => {
   let cpNetWorth = 0.00;
@@ -28,6 +30,21 @@ exports.fetchDetails = async (req, res, next) => {
     const expenses = await Expenses.find()
     const customers = await Customer.find({ 'reports.paid': false })
     const creditors = await Creditors.find()
+
+
+    //get expenses by date
+
+    const get_date = Helpers.get_current_timestamp(7)
+
+    const newExpenses = await Expenses.aggregate[{
+        $match: {
+            createdAt: {
+                $lte: get_date
+            }
+        }
+    }]
+
+    //this gets data weekly 
 
 
     /// Products section
@@ -83,6 +100,7 @@ exports.fetchDetails = async (req, res, next) => {
       outstandingPurchase: outstandingPurchase,
       outstandingPurchaseVolume: outstandingPurchaseVolume
     }; 
+
     return res.status(200).send({ error: false, message: 'Store details successfully fetched', data: storeDetails }); 
   } catch (error) {
     console.log(err);
