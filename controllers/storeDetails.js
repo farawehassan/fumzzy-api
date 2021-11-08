@@ -300,12 +300,12 @@ exports.fetchDetailsChart = async (req, res, next) => {
     ])
 
     var storeDetails = {
-      yesterday: [yesterdaySales, yesterdayProfit, yesterdayExpenses, yesterdayPurchases],
-      today: [todaySales, todayProfit, todayExpenses, todayPurchases],
-      week: [weekSales, weekProfit, weekExpenses, weekPurchases],
-      thisMonth: [monthSales, monthProfit, monthExpenses, monthPurchases],
-      sixMonth: [sixMonthSales, sixMonthProfit, sixMonthExpenses, sixMonthPurchases],
-      allTime: [allSales, allProfit, allExpenses, allPurchases],
+      yesterday: {yesterdaySales, yesterdayProfit, yesterdayExpenses, yesterdayPurchases},
+      today: {todaySales, todayProfit, todayExpenses, todayPurchases},
+      week: {weekSales, weekProfit, weekExpenses, weekPurchases},
+      thisMonth: {monthSales, monthProfit, monthExpenses, monthPurchases},
+      sixMonth: {sixMonthSales, sixMonthProfit, sixMonthExpenses, sixMonthPurchases},
+      allTime: {allSales, allProfit, allExpenses, allPurchases},
     }
 
     return res.status(200).send({ error: false, message: "Store details successfully fetched", data: storeDetails }); 
