@@ -253,7 +253,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
         $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(0), $lte: Helpers.getCurrentEndDate(0) } }
       },
       {
-        $group: { _id: null, total: { $sum: "$costPrice" } },
+        $group: { _id: null, total: { $sum: { $multiply : [ "$costPrice", "$quantity" ] } } },
       }
     ])
 
@@ -262,7 +262,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
         $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-1), $lte: Helpers.getCurrentDate() } }
       },
       {
-        $group: { _id: null, total: { $sum: "$costPrice" } },
+        $group: { _id: null, total: { $sum: { $multiply : [ "$costPrice", "$quantity" ] } } },
       }
     ])
 
@@ -271,7 +271,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
         $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: new Date() } }
       },
       {
-        $group: { _id: null, total: { $sum: "$costPrice" } },
+        $group: { _id: null, total: { $sum: { $multiply : [ "$costPrice", "$quantity" ] } } },
       }
     ])
 
@@ -280,7 +280,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
         $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
       },
       {
-        $group: { _id: null, total: { $sum: "$costPrice" } },
+        $group: { _id: null, total: { $sum: { $multiply : [ "$costPrice", "$quantity" ] } } },
       }
     ])
 
@@ -289,13 +289,13 @@ exports.fetchDetailsChart = async (req, res, next) => {
         $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: new Date() } }
       },
       {
-        $group: { _id: null, total: { $sum: "$costPrice" } },
+        $group: { _id: null, total: { $sum: { $multiply : [ "$costPrice", "$quantity" ] } } },
       }
     ])
 
     const allPurchases = await Purchases.aggregate([
       {
-        $group: { _id: null, total: { $sum: "$costPrice" } },
+        $group: { _id: null, total: { $sum: { $multiply : [ "$costPrice", "$quantity" ] } } },
       }
     ])
 
