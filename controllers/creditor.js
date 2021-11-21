@@ -1,4 +1,5 @@
 const Creditors = require('../models/creditor')
+const RepaymentHistory = require('../models/repaymentHistory')
 const { validationResult } = require('express-validator')
 
 /// This function creates a new creditors the staff makes 
@@ -76,7 +77,19 @@ exports.updateCreditor = async (req, res, next) => {
             console.log(err)
             return res.status(500).send({ error: true, message: 'Updating payment to report failed.' })
           } 
-          else return res.status(200).send({ error: false, message: 'Report updated successfully' })
+          else { 
+            RepaymentHistory.create({
+              customer: req.body.creditorId,
+              reportId: req.body.reportId,
+              amount: req.body.payment
+            }).then(val => {
+              return res.status(200).send({ error: false, message: 'Report updated successfully' }) 
+            }).catch(err => {
+              console.log(err)
+              return res.status(200).send({ error: false, message: 'Report updated successfully for but unable to add repayment' })
+            })
+            
+          }
         }
       )
     })

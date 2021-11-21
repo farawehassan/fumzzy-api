@@ -5,8 +5,8 @@ const Schema = mongoose.Schema
 const repaymentHistorySchema = new Schema(
   {
     customer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Customer',
+      type: String,
+      required: true,
     },
     reportId: {
       type: String,
