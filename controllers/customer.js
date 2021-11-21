@@ -1,4 +1,5 @@
 const Customer = require('../models/customer')
+const RepaymentHistory = require('../models/repaymentHistory')
 const { validationResult } = require('express-validator')
 
 // Add new customer
@@ -310,19 +311,30 @@ exports.updatePaymentMadeReport = (req, res, next) => {
   const customerId = req.body.id
   const reportId = req.body.reportId
   const payment = req.body.payment
+  const totalPaid = req.body.totalPaid
 
   Customer.findById(customerId)
     .then(customer => {
       if (!customer) {
         return res.status(422).send({ error: true, message: 'Couldn\'t find the customer with the id specified' })
       }
-      Customer.findOneAndUpdate({ 'reports._id': reportId }, { $set: { 'reports.$.paymentMade': payment } },
+      Customer.findOneAndUpdate({ 'reports._id': reportId }, { $set: { 'reports.$.paymentMade': totalPaid } },
         function (err, result) {
           if (err) {
             console.log(err)
             return res.status(500).send({ error: true, message: 'Updating payment to report failed.' })
-          } else {
-            return res.status(200).send({ error: false, message: `Payment updated successfully for ${customer.name}` })
+          } 
+          else {
+            RepaymentHistory.create({
+              customer: customerId,
+              reportId: reportId,
+              amount: payment
+            }).then(val => {
+              return res.status(200).send({ error: false, message: `Payment updated successfully for ${customer.name}` })
+            }).catch(err => {
+              console.log(err)
+              return res.status(200).send({ error: false, message: `Payment updated successfully for but unable to add repayment ${customer.name}` })
+            })
           }
         }
       )
@@ -338,6 +350,7 @@ exports.settlePaymentReport = (req, res, next) => {
   const customerId = req.body.id
   const reportId = req.body.reportId
   const payment = req.body.payment
+  const totalPayment = req.body.totalPayment
   const paymentReceivedAt = req.body.paymentReceivedAt
 
   Customer.findById(customerId)
@@ -347,7 +360,7 @@ exports.settlePaymentReport = (req, res, next) => {
       }
       Customer.findOneAndUpdate({ 'reports._id': reportId }, {
         $set: {
-          'reports.$.paymentMade': payment,
+          'reports.$.paymentMade': totalPayment,
           'reports.$.paid': true,
           'reports.$.paymentReceivedAt': paymentReceivedAt
         }
@@ -356,8 +369,18 @@ exports.settlePaymentReport = (req, res, next) => {
           if (err) {
             console.log(err)
             return res.status(500).send({ error: true, message: 'Updating payment to report failed.' })
-          } else {
-            return res.status(200).send({ error: false, message: `Payment settled successfully for ${customer.name}` })
+          } 
+          else {
+            RepaymentHistory.create({
+              customer: customerId,
+              reportId: reportId,
+              amount: payment
+            }).then(val => {
+              return res.status(200).send({ error: false, message: `Payment settled successfully for ${customer.name}` })
+            }).catch(err => {
+              console.log(err)
+              return res.status(200).send({ error: false, message: `Payment settled successfully for but unable to add repayment ${customer.name}` })
+            })
           }
         }
       )
