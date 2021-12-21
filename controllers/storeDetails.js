@@ -71,6 +71,45 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
   try {
 
+    // const customers = await Customer.find({ 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() }  })
+    // console.log(customers)
+
+    // /// Sales section
+    // var todayOutstandingSales = await Customer.aggregate([
+    //   {
+    //     $match: { 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
+    //   },
+    //   {
+    //     $group: { _id: null, total: { $sum: '$reports.totalAmount' }  },
+    //   }
+    // ])
+    // console.log(todayOutstandingSales)
+    // todayOutstandingSales = Helpers.getTotalValue(todayOutstandingSales) 
+    // console.log(todayOutstandingSales)
+
+
+    // var monthOutstandingSales = await Customer.aggregate([
+    //   {
+    //     $match: { 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
+    //   },
+    //   {
+    //     $group: { _id: null, total: { $sum: { $subtract : [ '$reports.totalAmount', '$reports.paymentMade' ] } }  },
+    //   }
+    // ])
+    // console.log(monthOutstandingSales)
+    // monthOutstandingSales = Helpers.getTotalValue(monthOutstandingSales)
+    // console.log(monthOutstandingSales)
+
+
+
+
+
+
+
+
+
+
+
     /// Sales section
     var todaySales = await Sales.aggregate([
       {

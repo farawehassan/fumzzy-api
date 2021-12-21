@@ -1,5 +1,6 @@
 const Customer = require('../models/customer')
 const RepaymentHistory = require('../models/repaymentHistory')
+const Helpers = require('../helpers/helper')
 const { validationResult } = require('express-validator')
 
 // Add new customer
@@ -14,14 +15,14 @@ exports.addNewCustomer = async (req, res, next) => {
     const totalAmount = req.body.totalAmount
     const paymentMade = req.body.paymentMade
     const paid = req.body.paid
-    const soldAt = req.body.soldAt
+    const soldAt = Helpers.getDateValue(req.body.soldAt)  
     var dueDate
     var paymentReceivedAt
   
     var reports
   
     if (req.body.dueDate) {
-      dueDate = req.body.dueDate
+      dueDate = Helpers.getDateValue(req.body.dueDate)
       reports = {
         report: report,
         discount: discount,
@@ -33,7 +34,7 @@ exports.addNewCustomer = async (req, res, next) => {
       }
     }
     else if (req.body.paymentReceivedAt) {
-      paymentReceivedAt = req.body.paymentReceivedAt
+      paymentReceivedAt = Helpers.getDateValue(req.body.paymentReceivedAt)
       reports = {
         report: report,
         discount: discount,
@@ -69,8 +70,8 @@ exports.addPreviousCustomer = async (req, res, next) => {
       totalAmount: req.body.totalAmount,
       paymentMade: 0,
       paid: false,
-      soldAt: req.body.soldAt,
-      dueDate: req.body.dueDate,
+      soldAt: Helpers.getDateValue(req.body.soldAt),
+      dueDate: Helpers.getDateValue(req.body.dueDate),
       description: req.body.description
     }
   
@@ -179,14 +180,14 @@ exports.addNewCustomerReport = (req, res, next) => {
   const totalAmount = req.body.totalAmount
   const paymentMade = req.body.paymentMade
   const paid = req.body.paid
-  const soldAt = req.body.soldAt
+  const soldAt = Helpers.getDateValue(req.body.soldAt)
   var dueDate
   var paymentReceivedAt
 
   var reports
 
   if (req.body.dueDate) {
-    dueDate = req.body.dueDate
+    dueDate = Helpers.getDateValue(req.body.dueDate)
     reports = {
       report: report,
       discount: discount,
@@ -198,7 +199,7 @@ exports.addNewCustomerReport = (req, res, next) => {
     }
   }
   else if (req.body.paymentReceivedAt) {
-    paymentReceivedAt = req.body.paymentReceivedAt
+    paymentReceivedAt = Helpers.getDateValue(req.body.paymentReceivedAt)
     reports = {
       report: report,
       discount: discount,
@@ -243,8 +244,8 @@ exports.addNewPreviousCustomerReport = async (req, res, next) => {
     totalAmount: req.body.totalAmount,
     paymentMade: 0,
     paid: false,
-    soldAt: req.body.soldAt,
-    dueDate: req.body.dueDate,
+    soldAt: Helpers.getDateValue(req.body.soldAt),
+    dueDate: Helpers.getDateValue(req.body.dueDate),
     description: req.body.description
   }
 
@@ -351,7 +352,7 @@ exports.settlePaymentReport = (req, res, next) => {
   const reportId = req.body.reportId
   const payment = req.body.payment
   const totalPayment = req.body.totalPayment
-  const paymentReceivedAt = req.body.paymentReceivedAt
+  const paymentReceivedAt = Helpers.getDateValue(req.body.paymentReceivedAt)
 
   Customer.findById(customerId)
     .then(customer => {
