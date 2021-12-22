@@ -329,6 +329,7 @@ exports.updatePaymentMadeReport = (req, res, next) => {
             RepaymentHistory.create({
               customer: customerId,
               reportId: reportId,
+              paymentMode: req.body.paymentMode,
               amount: payment
             }).then(val => {
               return res.status(200).send({ error: false, message: `Payment updated successfully for ${customer.name}` })
@@ -375,6 +376,7 @@ exports.settlePaymentReport = (req, res, next) => {
             RepaymentHistory.create({
               customer: customerId,
               reportId: reportId,
+              paymentMode: req.body.paymentMode,
               amount: payment
             }).then(val => {
               return res.status(200).send({ error: false, message: `Payment settled successfully for ${customer.name}` })

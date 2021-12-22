@@ -4,6 +4,7 @@ const Customer = require('../models/customer')
 const Purchases = require('../models/purchases')
 const Expenses = require('../models/expenses')
 const Creditors = require('../models/creditor')
+const RepaymentHistory = require('../models/repaymentHistory')
 const Helpers = require('../helpers/helper')
 
 // Fetch store details
@@ -21,6 +22,22 @@ exports.fetchDetails = async (req, res, next) => {
     const products = await Product.find()
     const customers = await Customer.find({ 'reports.paid': false })
     const creditors = await Creditors.find()
+
+    var outstandingPaymentMadeToday = await RepaymentHistory.aggregate([
+      {$match: {paymentMode: 'Cash', createdAt: {$gte: Helpers.getCurrentTimestamp(0)}}},
+      {$group: { _id: null, total: { $sum: '$amount' }}}
+    ])
+    outstandingPaymentMadeToday = Helpers.getTotalValue(outstandingPaymentMadeToday)
+
+    const todayOutstandingCustomers = await Customer.find({ 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(0), $lte: Helpers.getCurrentEndDate() } })
+    var todayOutstandingBalance = 0;
+    for(i = 0; i < todayOutstandingCustomers.length; i++){
+      for(j = 0; j < todayOutstandingCustomers[i]['reports'].length; j++){
+        if(todayOutstandingCustomers[i]['reports'][j]['soldAt'] > Helpers.getCurrentTimestamp(0)){
+          todayOutstandingBalance += (todayOutstandingCustomers[i]['reports'][j]['totalAmount'] - todayOutstandingCustomers[i]['reports'][j]['paymentMade'])
+        }
+      }
+    }
 
 
     /// Products section
@@ -55,7 +72,9 @@ exports.fetchDetails = async (req, res, next) => {
       outstandingSales: outstandingSales,
       outstandingSalesVolume: outstandingSalesVolume,
       outstandingPurchase: outstandingPurchase,
-      outstandingPurchaseVolume: outstandingPurchaseVolume
+      outstandingPurchaseVolume: outstandingPurchaseVolume,
+      outstandingPaymentMadeToday: outstandingPaymentMadeToday,
+      todayOutstandingBalance: todayOutstandingBalance
     }; 
 
     return res.status(200).send({ error: false, message: 'Store details successfully fetched', data: storeDetails }); 
@@ -70,45 +89,6 @@ exports.fetchDetails = async (req, res, next) => {
 exports.fetchDetailsChart = async (req, res, next) => {
 
   try {
-
-    // const customers = await Customer.find({ 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() }  })
-    // console.log(customers)
-
-    // /// Sales section
-    // var todayOutstandingSales = await Customer.aggregate([
-    //   {
-    //     $match: { 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
-    //   },
-    //   {
-    //     $group: { _id: null, total: { $sum: '$reports.totalAmount' }  },
-    //   }
-    // ])
-    // console.log(todayOutstandingSales)
-    // todayOutstandingSales = Helpers.getTotalValue(todayOutstandingSales) 
-    // console.log(todayOutstandingSales)
-
-
-    // var monthOutstandingSales = await Customer.aggregate([
-    //   {
-    //     $match: { 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
-    //   },
-    //   {
-    //     $group: { _id: null, total: { $sum: { $subtract : [ '$reports.totalAmount', '$reports.paymentMade' ] } }  },
-    //   }
-    // ])
-    // console.log(monthOutstandingSales)
-    // monthOutstandingSales = Helpers.getTotalValue(monthOutstandingSales)
-    // console.log(monthOutstandingSales)
-
-
-
-
-
-
-
-
-
-
 
     /// Sales section
     var todaySales = await Sales.aggregate([
@@ -133,7 +113,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var weekSales = await Sales.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$totalPrice' } },
@@ -143,7 +123,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var monthSales = await Sales.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$totalPrice' } },
@@ -153,7 +133,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var sixMonthSales = await Sales.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$totalPrice' } },
@@ -193,7 +173,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var weekTransferredSales = await Sales.aggregate([
       {
-        $match: { paymentMode: 'Transfer', createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: new Date() } }
+        $match: { paymentMode: 'Transfer', createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$totalPrice' } },
@@ -203,7 +183,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var monthTransferredSales = await Sales.aggregate([
       {
-        $match: { paymentMode: 'Transfer', createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
+        $match: { paymentMode: 'Transfer', createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$totalPrice' } },
@@ -213,7 +193,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var sixMonthTransferredSales = await Sales.aggregate([
       {
-        $match: { paymentMode: 'Transfer', createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: new Date() } }
+        $match: { paymentMode: 'Transfer', createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$totalPrice' } },
@@ -260,7 +240,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var weekProfit = await Sales.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: { 
@@ -272,7 +252,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var monthProfit = await Sales.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: { 
@@ -284,7 +264,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var sixMonthProfit = await Sales.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: { 
@@ -328,7 +308,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var weekExpenses = await Expenses.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$amount' } },
@@ -338,7 +318,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var monthExpenses = await Expenses.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$amount' } },
@@ -348,7 +328,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var sixMonthExpenses = await Expenses.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: '$amount' } },
@@ -387,7 +367,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var weekPurchases = await Purchases.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-7), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: { $multiply : [ '$costPrice', '$quantity' ] } } },
@@ -397,7 +377,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var monthPurchases = await Purchases.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-31), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: { $multiply : [ '$costPrice', '$quantity' ] } } },
@@ -407,7 +387,7 @@ exports.fetchDetailsChart = async (req, res, next) => {
 
     var sixMonthPurchases = await Purchases.aggregate([
       {
-        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: new Date() } }
+        $match: { createdAt: { $gte: Helpers.getCurrentTimestamp(-184), $lte: Helpers.getCurrentEndDate() } }
       },
       {
         $group: { _id: null, total: { $sum: { $multiply : [ '$costPrice', '$quantity' ] } } },

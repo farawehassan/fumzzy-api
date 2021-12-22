@@ -12,6 +12,10 @@ const repaymentHistorySchema = new Schema(
       type: String,
       required: true,
     },
+    paymentMode: {
+      type: String,
+      required: true,
+    },
     amount: {
       type: Number,
       required: true,

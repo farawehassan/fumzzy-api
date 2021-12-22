@@ -81,6 +81,7 @@ exports.updateCreditor = async (req, res, next) => {
             RepaymentHistory.create({
               customer: req.body.creditorId,
               reportId: req.body.reportId,
+              paymentMode: req.body.paymentMode,
               amount: req.body.payment
             }).then(val => {
               return res.status(200).send({ error: false, message: 'Report updated successfully' }) 
