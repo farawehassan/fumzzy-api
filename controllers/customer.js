@@ -330,7 +330,8 @@ exports.updatePaymentMadeReport = (req, res, next) => {
               customer: customerId,
               reportId: reportId,
               paymentMode: req.body.paymentMode,
-              amount: payment
+              amount: payment,
+              type: 'customer'
             }).then(val => {
               return res.status(200).send({ error: false, message: `Payment updated successfully for ${customer.name}` })
             }).catch(err => {
@@ -377,7 +378,8 @@ exports.settlePaymentReport = (req, res, next) => {
               customer: customerId,
               reportId: reportId,
               paymentMode: req.body.paymentMode,
-              amount: payment
+              amount: payment,
+              type: 'customer'
             }).then(val => {
               return res.status(200).send({ error: false, message: `Payment settled successfully for ${customer.name}` })
             }).catch(err => {

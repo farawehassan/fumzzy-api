@@ -20,6 +20,12 @@ const repaymentHistorySchema = new Schema(
       type: Number,
       required: true,
     },
+    type: {
+      type: String,
+      required: true,
+      enum: ['customer', 'creditor'],
+      default: 'customer'
+    },
   },
   { timestamps: true }
 )

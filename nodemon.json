@@ -1,8 +1,8 @@
 {
-    "env":{
+    "env": {
         "MONGO_USER": "mr_farawe",
         "MONGO_PASSWPORD": "Bolanle01",
-        "MONGO_DEFAULT_DATABASE": "fummzzy",
+        "MONGO_DEFAULT_DATABASE": "fummzzy-test",
         "JWT_SECRET": "my-ultra-secure-and-ultra-long-secret"
     }
 }

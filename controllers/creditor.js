@@ -82,7 +82,8 @@ exports.updateCreditor = async (req, res, next) => {
               customer: req.body.creditorId,
               reportId: req.body.reportId,
               paymentMode: req.body.paymentMode,
-              amount: req.body.payment
+              amount: req.body.payment,
+              type: 'debts'
             }).then(val => {
               return res.status(200).send({ error: false, message: 'Report updated successfully' }) 
             }).catch(err => {
