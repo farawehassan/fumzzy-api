@@ -125,7 +125,13 @@ exports.getPaginatedCreditors = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const creditors = await Creditors.find().select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
+    let creditors;
+    if(req.query.searchWord == null){
+      creditors = await Creditors.find().select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
+    else {
+      creditors = await Creditors.find({ 'name' : {$regex : req.query.searchWord, $options : 'i'} }).select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
     const creditorsLength = await Creditors.estimatedDocumentCount();
     const result = {
       totalCount: creditorsLength,

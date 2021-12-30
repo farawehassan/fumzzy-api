@@ -59,7 +59,13 @@ exports.getExpenses = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const expenses = await Expenses.find().select(['-__v']).populate('staff', '-pin -__v').sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    let expenses;
+    if(req.query.searchWord == null){
+      expenses = await Expenses.find().select(['-__v']).populate('staff', '-pin -__v').sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
+    else {
+      expenses = await Expenses.find({ 'description' : {$regex : req.query.searchWord, $options : 'i'} }).populate('staff', '-pin -__v').sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
     const expensesLength = await Expenses.estimatedDocumentCount();
     const result = {
       totalCount: expensesLength,

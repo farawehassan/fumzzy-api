@@ -14,7 +14,13 @@ exports.fetchSales = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const sales = await Sales.find().select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    let sales;
+    if(req.query.searchWord == null){
+      sales = await Sales.find().select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
+    else {
+      sales = await Sales.find({ 'productName' : {$regex : req.query.searchWord, $options : 'i'} }).select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    }
     const salesLength = await Sales.estimatedDocumentCount();
     const result = {
       totalCount: salesLength,

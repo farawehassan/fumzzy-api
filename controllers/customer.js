@@ -100,7 +100,14 @@ exports.fetchCustomers = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const customers = await Customer.find().select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
+    let customers;
+    if(req.query.searchWord == null){
+      customers = await Customer.find().select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
+    else {
+      customers = await Customer.find({ 'name' : {$regex : req.query.searchWord, $options : 'i'} }).select(['-__v']).sort({ updatedAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
+
     const customersLength = await Customer.estimatedDocumentCount();
     const result = {
       totalCount: customersLength,
@@ -129,7 +136,13 @@ exports.fetchDebtors = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const customers = await Customer.find({ 'reports.paid': false }).select(['-__v']).sort({ 'reports.dueDate': -1 }).limit(limit).skip(skipIndex).exec()
+    let customers;
+    if(req.query.searchWord == null){
+      customers = await Customer.find({ 'reports.paid': false }).select(['-__v']).sort({ 'reports.dueDate': -1 }).limit(limit).skip(skipIndex).exec()
+    } 
+    else {
+      customers = await Customer.find({ 'reports.paid': false, 'name' : {$regex : req.query.searchWord, $options : 'i'} }).select(['-__v']).sort({ 'reports.dueDate': -1 }).limit(limit).skip(skipIndex).exec()
+    } 
     const customersLength = await Customer.estimatedDocumentCount();
     const result = {
       totalCount: customersLength,

@@ -15,7 +15,13 @@ exports.fetchPurchases = async (req, res, next) => {
     
     const skipIndex = (page - 1) * limit
 
-    const purchases = await Purchases.find().populate({path: "product", populate: { path: "category" }}).select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    let purchases;
+    if(req.query.searchWord == null){
+      purchases = await Purchases.find().populate({path: "product", populate: { path: "category" }}).select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
+    else {
+      purchases = await Purchases.find({'product.productName' : {$regex : req.query.searchWord, $options : 'i'} }).populate({path: "product", populate: { path: "category" }}).select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+    } 
     const purchasesLength = await Purchases.estimatedDocumentCount();
     const result = {
       totalCount: purchasesLength,
@@ -53,9 +59,16 @@ exports.fetchAllPurchasesByProducts = async (req, res, next) => {
         else limit = parseInt(req.query.limit)
         
         const skipIndex = (page - 1) * limit
+
+        let purchases;
+        if(req.query.searchWord == null){
+          purchases = await Purchases.find({product: req.params.productId}).populate({path: "product", populate: { path: "category" }}).select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+        } 
+        else {
+          purchases = await Purchases.find({product: req.params.productId, 'product.productName' : {$regex : req.query.searchWord, $options : 'i'} }).populate({path: "product", populate: { path: "category" }}).select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
+        } 
     
         const allPurchases = await Purchases.find({product: req.params.productId})
-        const purchases = await Purchases.find({product: req.params.productId}).populate({path: "product", populate: { path: "category" }}).select(['-__v']).sort({ createdAt: -1 }).limit(limit).skip(skipIndex).exec()
         const result = {
           totalCount: allPurchases.length,
           page: page,
