@@ -29,12 +29,22 @@ exports.fetchDetails = async (req, res, next) => {
     ])
     outstandingPaymentMadeToday = Helpers.getTotalValue(outstandingPaymentMadeToday)
 
-    const todayOutstandingCustomers = await Customer.find({ 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(0), $lte: Helpers.getCurrentEndDate() } })
+    const todayOutstandingCustomers = await Customer.find({ 'reports.paid': false, 'reports.description': null, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(0), $lte: Helpers.getCurrentEndDate() } })
     var todayOutstandingBalance = 0;
     for(i = 0; i < todayOutstandingCustomers.length; i++){
       for(j = 0; j < todayOutstandingCustomers[i]['reports'].length; j++){
         if(todayOutstandingCustomers[i]['reports'][j]['soldAt'] > Helpers.getCurrentTimestamp(0)){
           todayOutstandingBalance += (todayOutstandingCustomers[i]['reports'][j]['totalAmount'] - todayOutstandingCustomers[i]['reports'][j]['paymentMade'])
+        }
+      }
+    }
+
+    const todayOutstandingSalesCustomers = await Customer.find({ 'reports.paid': false, 'reports.soldAt': { $gte: Helpers.getCurrentTimestamp(0), $lte: Helpers.getCurrentEndDate() } })
+    var todayOutstandingSalesBalance = 0;
+    for(i = 0; i < todayOutstandingSalesCustomers.length; i++){
+      for(j = 0; j < todayOutstandingSalesCustomers[i]['reports'].length; j++){
+        if(todayOutstandingSalesCustomers[i]['reports'][j]['soldAt'] > Helpers.getCurrentTimestamp(0)){
+          todayOutstandingSalesBalance += (todayOutstandingSalesCustomers[i]['reports'][j]['totalAmount'] - todayOutstandingSalesCustomers[i]['reports'][j]['paymentMade'])
         }
       }
     }
@@ -74,7 +84,8 @@ exports.fetchDetails = async (req, res, next) => {
       outstandingPurchase: outstandingPurchase,
       outstandingPurchaseVolume: outstandingPurchaseVolume,
       outstandingPaymentMadeToday: outstandingPaymentMadeToday,
-      todayOutstandingBalance: todayOutstandingBalance
+      todayOutstandingBalance: todayOutstandingBalance,
+      todayOutstandingSalesBalance: todayOutstandingSalesBalance
     }; 
 
     return res.status(200).send({ error: false, message: 'Store details successfully fetched', data: storeDetails }); 

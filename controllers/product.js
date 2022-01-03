@@ -172,3 +172,34 @@ exports.deleteProduct = (req, res, next) => {
       return res.status(500).send({ error: true, message: 'Deleting product failed.' })
     })
 }
+
+
+
+
+exports.updateTest = async (req, res, next) => {
+  const products = await Product.find()
+  for(i = 0; i < products.length; i++){
+    await Product.findByIdAndUpdate(
+      products[i]['_id'],
+      {
+        $set: {
+          productName: products[i]['productName'],
+          category: products[i]['category'],
+          costPrice: products[i]['costPrice'],
+          sellingPrice: products[i]['sellingPrice'],
+          initialQty: 0,
+          currentQty: 0,
+          sellersName: products[i]['sellersName'],
+        },
+      }).then(async(product) => {  
+        if (!product) {
+          console.log(`failed`)
+        }
+        console.log(`done`)
+      })
+      .catch((err) => {
+        console.log(err)
+        return res.status(500).send({ error: true, message: 'Updating product failed.' })
+      })
+  }
+}

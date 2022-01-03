@@ -66,4 +66,7 @@ router.put(
 // Delete a product from the database
 router.delete('/delete', isAuth, controller.deleteProduct)
 
+
+router.put('/testUpdate', isAuth, controller.updateTest)
+
 module.exports = router
