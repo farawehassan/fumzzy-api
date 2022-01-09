@@ -203,3 +203,14 @@ exports.updateTest = async (req, res, next) => {
       })
   }
 }
+
+
+exports.deleteTest = async (req, res, next) => {
+  await Product.deleteMany({currentQty: 0}).then(async(product) => {  
+    if (!product) console.log(`failed`)
+    console.log(`done`)
+  }).catch((err) => {
+    console.log(err)
+    return res.status(500).send({ error: true, message: 'Deleting product failed.' })
+  })
+}

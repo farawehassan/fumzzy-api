@@ -69,4 +69,6 @@ router.delete('/delete', isAuth, controller.deleteProduct)
 
 router.put('/testUpdate', isAuth, controller.updateTest)
 
+router.delete('/testDelete', isAuth, controller.deleteTest)
+
 module.exports = router

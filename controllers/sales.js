@@ -45,6 +45,9 @@ exports.addNewSales = async(req, res, next) => {
   const totalPrice = req.body.totalPrice
   const paymentMode = req.body.paymentMode
 
+  const product = await Product.findOne({productName: productName})
+  if(!product) return res.status(401).send({ error: true, message: 'Product not found' })
+
   await Sales.create({
     customerName: customerName,
     quantity: quantity,
@@ -55,38 +58,24 @@ exports.addNewSales = async(req, res, next) => {
     paymentMode: paymentMode,
     staff: req.name
   }).then(savedSales => {
-      Product.find({ productName: productName })
-        .then(product => {
-          if (!product) {
-            Sales.findByIdAndDelete(savedSales._id)
-              .then(() => {
-                return res.status(401).send({ error: true, message: 'Saving product failed.' })
-              })
-            return res.status(401).send({ error: true, message: 'Saving product failed.' })
-          }
-          Product.findByIdAndUpdate({ _id: product[0]._id }, { currentQty: (product[0].currentQty - parseFloat(quantity)) },
-            function (err, result) {
-              if (err) {
-                console.log(err)
-                Sales.findByIdAndDelete(savedSales._id)
-                  .then(() => {
-                    return res.status(401).send({ error: true, message: 'Saving product failed.' })
-                  })
-                return res.status(500).send({ error: true, message: 'Saving product failed.' })
-              } else {
-                return res.status(200).send({ error: false, message: `${productName} was saved successfully` })
-              }
-            }
-          )
-        })
-        .catch(err => {
+    Product.findByIdAndUpdate({ _id: product._id }, { currentQty: (product.currentQty - parseFloat(quantity)) },
+      function async (err, result) {
+        if (err) {
           console.log(err)
-          return res.status(500).send({ error: true, message: `Database operation failed, please try again` })
-        })
-    })
-    .catch(err => {
-      return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
-    })
+          Sales.findByIdAndDelete(savedSales._id).then( deletedSales => {
+            return res.status(500).send({ error: true, message: 'Saving product failed.' })
+          }).catch(e => {
+            console.log(e)
+            return res.status(500).send({ error: true, message: 'Saving product and deleting sales failed.' })
+          })
+        } 
+        else return res.status(200).send({ error: false, message: `${productName} was saved successfully` })
+      }
+    )
+  }).catch(err => {
+    console.log(err)
+    return res.status(500).send({ error: true, message: 'Database operation failed, please try again' })
+  })
 }
 
 // Update sales product name 
