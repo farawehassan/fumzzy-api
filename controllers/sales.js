@@ -47,6 +47,8 @@ exports.addNewSales = async(req, res, next) => {
 
   const product = await Product.findOne({productName: productName})
   if(!product) return res.status(401).send({ error: true, message: 'Product not found' })
+  if(parseFloat(quantity) === 0) return res.status(422).send({ error: true, message: 'Select a valid quantity' })
+  if(product.currentQty < quantity) return res.status(422).send({ error: true, message: 'Product not enough' })
 
   await Sales.create({
     customerName: customerName,
